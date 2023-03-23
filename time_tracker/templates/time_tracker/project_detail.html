@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{title}} {{project.name}}</title>
+        {% load static %}
+        <script type="text/javascript" src="{% static 'jquery-3.6.4.min.js' %}"></script> 
+        <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
+        <script type="text/javascript">
+            {% comment %} a javascript function that take the value of the input and do a post request to the server {% endcomment %}
+            function create_task() {
+                var task_name = $("#task_name").val();
+
+                if(task_name == ""){
+                    alert("Please enter a task name");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'time_tracker:create_task' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'task_name': task_name,
+                        'project_id': '{{ project.id }}',
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        location.reload();
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
+            
+
+            function start_task(element) {
+                var task_id = $(element).attr('task_id');
+                
+                if(task_id == ""){
+                    alert("no valid task id");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'time_tracker:create_task_timer' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'task_id': task_id,
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        location.reload();
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
+            
+
+            function stop_task(element) {
+                var task_timer_id = $(element).attr('task_timer_id');
+                
+                if(task_timer_id== ""){
+                    alert("no valid task id");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'time_tracker:stop_task_timer' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'task_timer_id': task_timer_id,
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        location.reload();
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
+            
+            function delete_timer(element) {
+                var task_timer_id = $(element).attr('task_timer_id');
+                
+                if(task_timer_id== ""){
+                    alert("no valid task id");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'time_tracker:delete_task_timer' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'task_timer_id': task_timer_id,
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        location.reload();
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
+
+
+            function timer() {
+                var timers = $(".timer");
+                for (var i = 0; i < timers.length; i++) {
+                    var timer = timers[i];
+                    var start_time = $(timer).attr('start_time')*1000;
+                    var current_time = new Date().getTime();
+                    var time = current_time - start_time;
+
+                    var hours = Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    var minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.floor((time % (1000 * 60)) / 1000);
+                    var milliseconds = Math.floor((time % (1000 * 60)) / 100);
+                    $(timer).html(hours + ":" + minutes + ":" + seconds);
+                }
+            }
+
+            $(document).ready(function() {
+                $("#create_task_button").click(function () {
+                    console.log("Sending request to create task");
+                    create_task();
+                });
+
+                $(".start_task_button").click(function () {
+                    start_task(this);
+                });
+
+                $(".stop_task_button").click(function () {
+                    stop_task(this);
+                });
+
+                $(".delete_timer_button").click(function () {
+                    delete_timer(this);
+                });
+
+                setInterval(timer, 1000);
+            })
+            
+
+        </script>
+
+        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+
+        <style>
+            .task-container {
+                margin: 10px;
+                display: flex,
+                flex-direction: row;
+                border: 1px solid black;
+            }
+
+            .task-item{
+                margin:10px;
+                text-align: center;
+                border: 1px solid green;
+
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class='card'>
+            <div class="card-header">
+                Project Name : {{project.name}}
+            </div>
+            <div class="card-body">
+                <div class="col-10">
+                    <input type="text" class="form-control" id="task_name" placeholder="start something">
+                </div>
+                <div class="col-2">
+                    <button type="submit" class="btn btn-primary" id="create_task_button">Create</button>
+                </div>
+            </div>
+        </div>
+
+        {% if task_list %}
+
+            <div class='task-container'>
+                {% for task in task_list%}
+                        <div class='card task-item'>
+                            <div class="card-header">
+                                {{ task.name }}
+                            </div>
+                            <div class="card-body">
+                                <button type="submit" task_id="{{task.id}}" class="start_task_button">Start</button>
+
+                                {% for timer in task.tasktimer_set.all %}
+                                    <div class='card task-item'>
+                                        <div class="card-header">
+
+                                            {% if not timer.end_time %}
+                                                <div>
+                                                    {{ timer.start_time }}
+                                                </div>
+                                                <div>
+                                                    <time class="timer" start_time = {{ timer.start_time.timestamp }}>0:00:00</time>
+                                                </div>
+                                                <div class="card-body">
+                                                    <button type="submit" task_timer_id="{{timer.id}}" class="stop_task_button">Stop</button>
+                                                </div>
+                                            {% else %}
+                                                <div>
+                                                    Started at: {{ timer.start_time }}
+                                                </div>
+                                                <div>
+                                                    Duration {{ timer.duration }}
+
+                                                </div>
+                                                </div>
+                                                    <button type="submit" task_timer_id="{{timer.id}}" class="delete_timer_button">Delete</button>
+                                                </div>
+                                            {% endif %}
+                                        </div> 
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    </body>
+</html>
