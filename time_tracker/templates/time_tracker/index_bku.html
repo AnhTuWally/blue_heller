@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{title}}</title>
+        {% load static %}
+        <script type="text/javascript" src="{% static 'jquery-3.6.4.min.js' %}"></script> 
+        <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
+        <script type="text/javascript">
+            {% comment %} a javascript function that take the value of the input and do a post request to the server {% endcomment %}
+            function create_project() {
+                var project_name = $("#project_name").val();
+
+                if(project_name == ""){
+                    alert("Please enter a project name");
+                    return;
+                }
+
+                console.log(project_name)
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'time_tracker:create_project' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'project_name': project_name,
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        $("#project_name").val("");
+                        location.reload();
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
+            
+            $(document).ready(function() {
+                $("#create_project_button").click(function () {
+                    console.log("Sending request to create new projet");
+                    create_project();
+                });
+
+                $("#project_name").keypress(function (e) {
+                    if (e.which == 13) {
+                        console.log("Sending request to create new projet");
+                        create_project();
+                    }
+                })
+            })
+            
+
+            {% comment %} when the user press enter run this function {% endcomment %}
+
+        </script>
+
+        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+
+        <style>
+            .project-container {
+                display: flex;
+                margin: 10px;
+                border: 1px solid black;
+                justify-content: center;
+            }
+
+            .project-item{
+                margin:10px;
+                text-align: center;
+                border: 1px solid green;
+
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class='card'>
+            <div class="card-header">
+                Howdy
+            </div>
+            <div class="card-body">
+                <div class="col-10">
+                    <input type="text" class="form-control" id="project_name" placeholder="Awesome like a pawsum">
+                </div>
+                <div class="col-2">
+                    <button type="submit" class="btn btn-primary" id="create_project_button">Create</button>
+                </div>
+            </div>
+        </div>
+
+        {% if project_list %}
+
+            <div class='project-container'>
+                {% for project in project_list %}
+                        <div class='card project-item'>
+                            <div class="card-header">
+                                <a href={% url 'time_tracker:project_detail' project.id %}>{{ project.name }}</a>
+                            </div>
+                        </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    </body>
+</html>
