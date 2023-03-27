@@ -83,6 +83,29 @@
                 });
             }
 
+            function reload_note_detail(){
+                var project_id = $('#project_detail_modal').attr('project_id');
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'sticky_note:view_notes' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'project_id': project_id,
+                    },
+                    success: function (response) {
+                        $("#sticky_note_modal").html(response);
+                        $("#sticky_note_modal").attr('project_id', project_id);
+                        connect_note_event();
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
+
             {% comment %} a javascript function that take the value of the input and do a post request to the server {% endcomment %}
             function create_task() {
                 var task_name = $("#task_name").val();
@@ -303,6 +326,7 @@
                     },
                     success: function (response) {
                         console.log('success');
+                        reload_note_detail();
                     },
                     error: function (response) {
                         console.log(response);
@@ -328,12 +352,31 @@
                     },
                     success: function (response) {
                         console.log('success');
+                        reload_note_detail()
                     },
                     error: function (response) {
                         console.log(response);
                     }
                 });
 
+            }
+
+
+            function unbine_note_evet(){
+                $('.new_note_submit').unbind();
+                $('.delete_note').unbind();
+            }
+
+            function connect_note_event(){
+                unbine_note_evet();
+                $('#new_note_submit').click(function () {
+                    create_note();
+                });
+
+
+                $('.delete_note').click(function () {
+                    delete_note(this);
+                });
             }
 
             function unbine_task_event(){
@@ -349,8 +392,6 @@
                 $('.delete_task_button').unbind();
                 $('.view_task_button').unbind();
 
-                $('.new_note_submit').unbind();
-                $('.delete_note').unbind();
             }
 
             function connect_task_event(){
@@ -362,14 +403,6 @@
                     load_notes(this);
                 });
                 
-                $('#new_note_submit').click(function () {
-                    create_note();
-                });
-
-
-                $('.delete_note').click(function () {
-                    delete_note(this);
-                });
 
                 $("#create_task_button").click(function () {
                     console.log("Sending request to create task");
@@ -461,8 +494,7 @@
                     success: function (response) {
                         $("#sticky_note_modal").html(response);
                         $("#sticky_note_modal").attr('project_id', project_id);
-
-                        connect_task_event()
+                        connect_note_event()    
                     },
                     error: function (response) {
                         console.log(response);
