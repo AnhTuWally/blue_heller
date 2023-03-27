@@ -2,6 +2,7 @@ from django.urls import path
 
 from . import views
 
+
 app_name = 'time_tracker'
 urlpatterns = [
     path(r'', views.index, name='index'),
@@ -15,5 +16,5 @@ urlpatterns = [
     path(r'create_task_timer', views.create_task_timer, name='create_task_timer'),
     path(r'stop_task_timer', views.stop_task_timer, name='stop_task_timer'),
     path(r'delete_task_timer', views.delete_task_timer, name='delete_task_timer'),
-    path(r'edit_task_timer', views.edit_task_timer, name='edit_task_timer')
+    path(r'edit_task_timer', views.edit_task_timer, name='edit_task_timer'),
 ]

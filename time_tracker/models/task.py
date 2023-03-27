@@ -16,6 +16,16 @@ class Task(BaseModel):
         for task_timer in self.tasktimer_set.all():
             if task_timer.duration:
                 total +=task_timer.duration
-        
+            
         return total
+    
+    @property
+    def total_time_str(self):
+        total_seconds = self.total_time.total_seconds()
+        # convert total_seconds to hours, minutes, seconds
+        hours = int(total_seconds // 3600)
+        minutes = int((total_seconds % 3600) // 60)
+        seconds = int(total_seconds % 60)
+        # format hours minutes  and seconds to 00:00:00
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 

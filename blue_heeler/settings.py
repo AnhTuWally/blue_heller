@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'time_tracker.apps.TimeTrackerConfig',
+    'sticky_note.apps.StickyNoteConfig',
     'user.apps.UserConfig',
     'django.contrib.admin',
     'django.contrib.auth',

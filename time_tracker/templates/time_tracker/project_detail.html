@@ -1,8 +1,16 @@
+<style>
+    .active_task_view{
+        display:flex;
+        align-item:center;
+        justify-content:space-between;
+    }
+    .active_task_view div{
+        padding: 5px;
+    }
+</style>
+
 <div style="display:flex;flex-direction:column">
     <div class='card'>
-        <div>
-            <a href="{% url 'time_tracker:index' %}">Project</a>
-        </div>
         <div class="card-header" >
             Project Name : {{project.name}}
         </div>
@@ -25,7 +33,7 @@
                         </div>
                         <div class="card-body">
                             <div>
-                                Total Time : {{task.total_time}}
+                                Total Time : {{task.total_time_str}}
                             </div>
                             <div style="display:flex; flex-direction:row; justify-content:center">
                                 <button type="submit" task_id="{{task.id}}" class="start_task_button">Start</button>
@@ -43,28 +51,30 @@
 
     <div class='active_task' style='border:solid 1px black;'>
         {% for active_task in active_tasks %}
-            <div style='display:flex;'>
+            <div class='active_task_view'>
 
                 <div>
-                    <button class="view_task_button" task_id={{active_task.task.id}}>{{ active_task.task.name }}</button>
-                </div>
-                <div style='border:solid 1px green;padding:10px;'>
-
                     <button class="open_project_button" project_id = {{active_task.project.id}} >
                         {{active_task.project.name}}
                     </button>
                 </div>
+
+                <div>
+                    <button class="view_task_button" task_id={{active_task.task.id}}>{{ active_task.task.name }}</button>
+                </div>
+
                 <div>
                     {{active_task.start_time}}
                 </div>
                 
                 <div>
-                    <time class="timer" start_time = {{ active_task.task_timer.start_time.timestamp }}>0:00:00</time>
+                    <time class="timer" start_time = {{ active_task.start_time.timestamp }}>0:00:00</time>
                 </div>
 
                 <div>
-                    <button type="submit" class="btn btn-danger stop_task_button" task_timer_id={{active_task.task_timer.id}}>Stop</button>
+                    <button type="submit" class="btn btn-danger stop_task_button" active_task_id={{active_task.id}}>Stop</button>
                 </div>
+
             </div>
         {% endfor %}
     </div>

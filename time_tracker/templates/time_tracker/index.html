@@ -28,7 +28,6 @@
                         'project_name': project_name,
                     },
                     success: function (response) {
-                        console.log(response);
                         $("#project_name").val("");
                         location.reload();
                     },
@@ -53,7 +52,6 @@
                         'project_id': project_id,
                     },
                     success: function (response) {
-                        console.log(response);
                         location.reload();
                     },
                     error: function (response) {
@@ -109,7 +107,6 @@
                         'project_id': project_id,
                     },
                     success: function (response) {
-                        console.log(response);
                         $("#task_name").val("");
                         reload_project_detail();
                     },
@@ -143,7 +140,6 @@
                         'user_id': user_id,
                     },
                     success: function (response) {
-                        console.log(response);
                         reload_project_detail()
                     },
                     error: function (response) {
@@ -154,10 +150,10 @@
             
 
             function stop_task(element) {
-                var task_timer_id = $(element).attr('task_timer_id');
+                var active_task_id = $(element).attr('active_task_id');
                 var user_id = $('.current_user').attr('user_id');
                 
-                if(task_timer_id== ""){
+                if(active_task_id== ""){
                     alert("no valid task id");
                     return;
                 }
@@ -170,11 +166,10 @@
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
                     data: {
-                        'task_timer_id': task_timer_id,
+                        'active_task_id': active_task_id,
                         'user_id': user_id
                     },
                     success: function (response) {
-                        console.log(response);
                         reload_project_detail(); 
                         
                     },
@@ -187,7 +182,7 @@
             function delete_timer(element) {
                 var task_timer_id = $(element).attr('task_timer_id');
                 
-                var task_id = $('.task_detail_modal').attr('task_id');
+                var task_id = $('#task_detail_modal').attr('task_id');
 
                 if(task_timer_id== ""){
                     alert("no valid task id");
@@ -205,9 +200,7 @@
                         'task_timer_id': task_timer_id,
                     },
                     success: function (response) {
-                        console.log(response);
-                        {% comment %} open_task(task_id); {% endcomment %}
-                        reload_project_detail();
+                        open_task(task_id);
                     },
                     error: function (response) {
                         console.log(response);
@@ -228,6 +221,11 @@
                     var minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
                     var seconds = Math.floor((time % (1000 * 60)) / 1000);
                     var milliseconds = Math.floor((time % (1000 * 60)) / 100);
+
+                    hours = hours.toString().padStart(2, '0');
+                    minutes = minutes.toString().padStart(2, '0');
+                    seconds = seconds.toString().padStart(2, '0');
+
                     $(timer).html(hours + ":" + minutes + ":" + seconds);
                 }
             }
@@ -235,6 +233,12 @@
             function edit_timer(element){
 
                 var ttid = $(element).attr('task_timer_id');
+                var send_edit_timer_button= $(`.send_edit_timer_button[task_timer_id="${ttid}"]`);
+                send_edit_timer_button.show();
+
+                var edit_timer_button = $(`.edit_timer_button[task_timer_id="${ttid}"]`);
+                edit_timer_button.hide();
+
                 current_start_time = $(`.start_time[task_timer_id="${ttid}"]`).html().trim();
                 current_end_time = $(`.end_time[task_timer_id="${ttid}"]`).html().trim();
                 $(`.start_time[task_timer_id="${ttid}"]`).html(`<input type="text" class='start_time_edit' task_timer_id="${ttid}" value="${current_start_time}">`);
@@ -245,7 +249,7 @@
 
                 var ttid = $(element).attr('task_timer_id');
 
-                var task_id = $('.task_detail_modal').attr('task_id');
+                var task_id = $('#task_detail_modal').attr('task_id');
                 start_time_value = $(`.start_time_edit[task_timer_id="${ttid}"]`).val().trim();
                 end_time_value = $(`.end_time_edit[task_timer_id="${ttid}"]`).val().trim();
 
@@ -262,8 +266,68 @@
                         'end_time_value': end_time_value,
                     },
                     success: function (response) {
+                        open_task(task_id);
+                    },
+                    error: function (response) {
                         console.log(response);
-                        reload_project_detail();
+                    }
+                });
+
+            }
+
+            function create_note(){
+
+                var user_id = $('.current_user').attr('user_id');
+                var project_id = $('#sticky_note_modal').attr('project_id');
+
+                var note_name = $('#new_note_name').val().trim();
+                var content = $('#new_note_content').val().trim();
+
+                if(note_name == '' && content==''){
+                    alert('please fill all fields');
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'sticky_note:create_note' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'project_id': project_id,
+                        'name': note_name,
+                        'content': content,
+                        'user_id': user_id
+                    },
+                    success: function (response) {
+                        console.log('success');
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+
+            }
+            function delete_note(element){
+                
+                var note_id= $(element).attr('note_id');
+
+                console.log(note_id)
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'sticky_note:delete_note' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'note_id': note_id,
+                    },
+                    success: function (response) {
+                        console.log('success');
                     },
                     error: function (response) {
                         console.log(response);
@@ -284,6 +348,9 @@
                 $('.send_edit_timer_button').unbind();
                 $('.delete_task_button').unbind();
                 $('.view_task_button').unbind();
+
+                $('.new_note_submit').unbind();
+                $('.delete_note').unbind();
             }
 
             function connect_task_event(){
@@ -292,6 +359,16 @@
 
                 $('.open_project_button').click(function () {
                     open_project(this);
+                    load_notes(this);
+                });
+                
+                $('#new_note_submit').click(function () {
+                    create_note();
+                });
+
+
+                $('.delete_note').click(function () {
+                    delete_note(this);
                 });
 
                 $("#create_task_button").click(function () {
@@ -313,19 +390,6 @@
                     stop_task(this);
                 });
 
-                $(".delete_timer_button").click(function () {
-                    delete_timer(this);
-                });
-
-
-                $('.edit_timer_button').click(function () {
-                    edit_timer(this);
-                });
-
-                $('.send_edit_timer_button').click(function () {
-                    send_edit_timer(this);
-                });
-                
                 $(".view_task_button").click(function () {
 
                     var task_id = $(this).attr('task_id');
@@ -338,11 +402,26 @@
                 });
             }
 
+            function connect_task_timer_event(){
+                $(".delete_timer_button").click(function () {
+                    delete_timer(this);
+                });
+
+
+                $('.edit_timer_button').click(function () {
+                    edit_timer(this);
+                });
+
+                $('.send_edit_timer_button').click(function () {
+                    send_edit_timer(this);
+                });
+            }
+
             function open_project(element) {
                 var project_id = $(element).attr('project_id');
 
                 console.log(project_id)
-
+                
                 $.ajax({
                     type: "POST",
                     url: "{% url 'time_tracker:project_detail' %}",
@@ -354,9 +433,34 @@
                         'project_id': project_id,
                     },
                     success: function (response) {
-                        console.log(response);
                         $("#project_detail_modal").html(response);
                         $("#project_detail_modal").attr('project_id', project_id);
+
+                        connect_task_event()
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
+
+
+            function load_notes(element) {
+                var project_id = $(element).attr('project_id');
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'sticky_note:view_notes' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'project_id': project_id,
+                    },
+                    success: function (response) {
+                        $("#sticky_note_modal").html(response);
+                        $("#sticky_note_modal").attr('project_id', project_id);
 
                         connect_task_event()
                     },
@@ -380,11 +484,10 @@
                         'task_id': task_id,
                     },
                     success: function (response) {
-                        console.log(response);
                         $("#task_detail_modal").html(response);
                         $("#task_detail_modal").attr('task_id', task_id);
 
-                        connect_task_event();
+                        connect_task_timer_event();
                     },
                     error: function (response) {
                         console.log(response);
@@ -407,7 +510,6 @@
                         'task_id': task_id,
                     },
                     success: function (response) {
-                        console.log(response);
                         reload_project_detail();
                     },
                     error: function (response) {
@@ -431,7 +533,6 @@
                         'username': username,
                     },
                     success: function (response) {
-                        console.log(response);
                         $(".username").val("");
                         $(".current-user").html(response);
                     },
@@ -461,6 +562,7 @@
 
                 $('.open_project_button').click(function () {
                     open_project(this);
+                    load_notes(this);
                 });
 
                 $('.create_user_button').click(function () {
@@ -499,44 +601,45 @@
     </head>
 
     <body>
-   <div style="display:flex;"> 
-       <div>
-           <div class="user-selection">
-               <div class="current_user" user_id = {{ current_user.id }}>
-                   {{ current_user.name }}
-               </div>
-               <div>
-                   <input type="text" class='username' placeholder='howdy'> 
-               </div>
-               <div>
-                   <button type="submit" class="btn btn-primary create_user_button">Login</button>
-               </div>
-           </div>
-           <div class="bg-dark text-primary" style='width:300px;'>
-               <div class="list-group list-group-flush border-bottom scrollarea" style="width:250px;">
-                   <div>
-                       <div class="new-project-input">
-                           <input type="text" class="form-control" id="project_name" placeholder="start something">
-                       </div>
-                       <div class="new-project-button">
-                           <button type="submit" class="btn btn-primary" id="create_project_button">New Project</button>
-                       </div>
-                   </div>
-                   {% for project in project_list %}
-                       <div style="display:flex">
-                           <a class="list-group-item list-group-item-action py-3 lh-tight open_project_button" project_id = {{project.id}} >
-                               <strong class="mb-1">{{project.name}}</strong>
-                           </a>
-                           <button type="submit" class="btn btn-danger delete_project_button" project_id={{project.id}}>X</button>
-                       </div>
-                   {% endfor %}
-               </div>
+        <div style="display:flex;"> 
+            <div>
+                <div class="user-selection">
+                    <div class="current_user" user_id = {{ current_user.id }}>
+                        {{ current_user.name }}
+                    </div>
+                    <div>
+                        <input type="text" class='username' placeholder='howdy'> 
+                        <button type="submit" class="btn btn-primary create_user_button">Login</button>
+                    </div>
+                </div>
+                <div class="bg-dark text-primary" style='width:300px;'>
+                    <div class="list-group list-group-flush border-bottom scrollarea" style="width:250px;">
+                        <div style="display:flex;">
+                            <div class="new-project-input" style='padding:5px'>
+                                <input type="text" class="form-control" id="project_name" placeholder="start something">
+                            </div>
+                            <div class="new-project-button" style='padding:5px'>
+                                <button type="submit" class="btn btn-primary" id="create_project_button">New</button>
+                            </div>
+                        </div>
+                        {% for project in project_list %}
+                            <div style="display:flex">
+                                <a class="list-group-item list-group-item-action py-3 lh-tight open_project_button" project_id = {{project.id}} >
+                                    <strong class="mb-1">{{project.name}}</strong>
+                                </a>
+                                <button type="submit" class="btn btn-danger delete_project_button" project_id={{project.id}}>X</button>
+                            </div>
+                        {% endfor %}
+                    </div>
 
-           </div>
-       </div>
-       <div id="project_detail_modal" project_id=''>
-       </div>
-   </div>
+                </div>
+            </div>
+            <div id="project_detail_modal" project_id=''>
+            </div>
+            <div id="sticky_note_modal" project_id=''>
 
-    </body>
+            </div>
+        </div>
+
+         </body>
 </html>

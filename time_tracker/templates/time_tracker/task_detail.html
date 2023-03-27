@@ -23,11 +23,11 @@
                     {{ timer.end_time|date:"Y-m-d H:i" }}
                 </div>
                 <div class='duration'  task_timer_id="{{timer.id}}">
-                    Duration {{ timer.duration }}
+                    Duration {{ timer.duration_str }}
                 </div>
                 <div style='display:flex;flex-direction:row;justify-content:center'>
                     <button type="submit" task_timer_id="{{timer.id}}" class="edit_timer_button">Edit</button>
-                    <button type="submit" task_timer_id="{{timer.id}}" class="send_edit_timer_button">Done</button>
+                    <button type="submit" task_timer_id="{{timer.id}}" class="send_edit_timer_button" style='display:none'>Done</button>
                     <button type="submit" task_timer_id="{{timer.id}}" class="delete_timer_button">Delete</button>
                 </div>
             {% endif %}

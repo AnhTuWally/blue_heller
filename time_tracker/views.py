@@ -9,7 +9,8 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 
 from .models import Project, Task, TaskTimer, ActiveTask
 from user.models import User
-import json
+
+from datetime import timedelta
 
 # Create your views here.
 
@@ -155,7 +156,7 @@ def create_task(request):
 
     return HttpResponseBadRequest('Invalid method')
 
-
+# TODO: rename task timer since we are actually creating active task timer
 def create_task_timer(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if is_ajax:
@@ -165,19 +166,18 @@ def create_task_timer(request):
             task_id = data.get('task_id', None)
             user_id= data.get('user_id', None)
 
-            task = Task.objects.get(id=task_id)
-
-            task_timer = TaskTimer.objects.create(project=task.project, task=task)
-
-            task_timer.start_time = timezone.now()
-
-            task_timer.save()
-
             user = User.objects.get(id=user_id)
 
-            active_task, created = ActiveTask.objects.get_or_create(user=user, task_timer=task_timer)
+            task = Task.objects.get(id=task_id)
 
-            return JsonResponse({'task_timer_id': task_timer.id})
+            # task_timer, created = TaskTimer.objects.get_or_create(project=task.project, task=task, user=user)
+
+            active_task, created = ActiveTask.objects.get_or_create(user=user, task=task)
+            if created:
+                active_task.start_time = timezone.now()
+                active_task.save()
+
+            return JsonResponse({'active_task_id': active_task.id})
 
 
     return HttpResponseBadRequest('Invalid method')
@@ -189,25 +189,27 @@ def stop_task_timer(request):
         if request.method == 'POST':
             data = request.POST
 
-            task_timer_id = data.get('task_timer_id', None)
+            active_task_id = data.get('active_task_id', None)
             user_id= data.get('user_id', None)
+
+            print(active_task_id)
             
-            if task_timer_id is None:
+            if active_task_id is None:
                 return HttpResponseBadRequest('Invalid task timer id')
 
-            task_timer = TaskTimer.objects.get(id=task_timer_id)
+            active_task = ActiveTask.objects.get(id=active_task_id)
 
-            if task_timer.end_time is not None:
-                return HttpResponseBadRequest('Task timer already stopped')
-
+            task_timer = TaskTimer(project=active_task.task.project, task=active_task.task, user=active_task.user, start_time=active_task.start_time)
             task_timer.end_time = timezone.now()
             task_timer.duration = task_timer.end_time - task_timer.start_time
-
             task_timer.save()
 
-            user = User.objects.get(id=user_id)
-            active_task = ActiveTask.objects.get(user=user, task_timer=task_timer)
             active_task.delete()
+
+            #timedelta of 1 second
+            if task_timer.duration < timedelta(seconds=1):
+                task_timer.delete()
+                return HttpResponse('Task timer duration is less than 1 second. Deleting')
 
             return HttpResponse('Success')
 

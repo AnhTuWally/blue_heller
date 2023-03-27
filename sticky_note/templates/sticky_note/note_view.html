@@ -1,0 +1,33 @@
+<div class='card'>
+    <div clas='card-header'>
+        <input type="text" id="new_note_name" placeholder='note name'>
+    </div>
+    <div class='card-body'>
+        <div>
+            <textarea id="new_note_content" rows="4" cols="50"></textarea>
+        </div>
+
+        <div>
+            <button id="new_note_submit">Submit</button>
+        </div>
+    </div>
+</div>
+
+{% if notes %}
+    {% for note in notes %}
+        <div class='card'>
+            <div clas='card-header'>
+                <input type="text" class="note_name" note_id={{note.id}} placeholder={{note.name}}>
+            </div>
+            <div class='card-body'>
+                <div>
+                    <textarea class="note_content" rows="4" cols="50">{{note.note}}</textarea>
+                </div>
+
+                <div>
+                    <button class="delete_note" note_id={{note.id}}>Delete</button>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
