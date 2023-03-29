@@ -1,36 +1,42 @@
 
-{% for timer in task.tasktimer_set.all %}
-    <div class='card task-item'>
-        <div class="card-header">
-            <div> 
-                Start Time
-            </div>
-            <div class='start_time' task_timer_id="{{timer.id}}">
-                {{ timer.start_time|date:"Y-m-d H:i"}}
-            </div>
-            {% if not timer.end_time %}
-                <div>
-                    <time class="timer" start_time = {{ timer.start_time.timestamp }}>0:00:00</time>
-                </div>
-                <div class="card-body">
-                    <button type="submit" task_timer_id="{{timer.id}}" class="stop_task_button">Stop</button>
-                </div>
-            {% else %}
-                <div> 
-                    End Time
-                </div>
-                <div class='end_time' task_timer_id="{{timer.id}}">
-                    {{ timer.end_time|date:"Y-m-d H:i" }}
-                </div>
-                <div class='duration'  task_timer_id="{{timer.id}}">
-                    Duration {{ timer.duration_str }}
-                </div>
-                <div style='display:flex;flex-direction:row;justify-content:center'>
-                    <button type="submit" task_timer_id="{{timer.id}}" class="edit_timer_button">Edit</button>
-                    <button type="submit" task_timer_id="{{timer.id}}" class="send_edit_timer_button" style='display:none'>Done</button>
-                    <button type="submit" task_timer_id="{{timer.id}}" class="delete_timer_button">Delete</button>
-                </div>
-            {% endif %}
-        </div> 
+{% if not task_timer_list%}
+    <div style='color:#fff;'>
+        This task has not been started yet.
     </div>
-{% endfor %}
+{% else %}
+    {% for timer in task_timer_list %}
+        <div class='card task-item'>
+            <div class="card-header">
+                <div> 
+                    Start Time
+                </div>
+                <div class='start_time' task_timer_id="{{timer.id}}">
+                    {{ timer.start_time|date:"Y-m-d H:i"}}
+                </div>
+                {% if not timer.end_time %}
+                    <div>
+                        <time class="timer" start_time = {{ timer.start_time.timestamp }}>0:00:00</time>
+                    </div>
+                    <div class="card-body">
+                        <button type="submit" task_timer_id="{{timer.id}}" class="stop_task_button">Stop</button>
+                    </div>
+                {% else %}
+                    <div> 
+                        End Time
+                    </div>
+                    <div class='end_time' task_timer_id="{{timer.id}}">
+                        {{ timer.end_time|date:"Y-m-d H:i" }}
+                    </div>
+                    <div class='duration'  task_timer_id="{{timer.id}}">
+                        Duration {{ timer.duration_str }}
+                    </div>
+                    <div style='display:flex;flex-direction:row;justify-content:center'>
+                        <button type="submit" task_timer_id="{{timer.id}}" class="edit_timer_button">Edit</button>
+                        <button type="submit" task_timer_id="{{timer.id}}" class="send_edit_timer_button" style='display:none'>Done</button>
+                        <button type="submit" task_timer_id="{{timer.id}}" class="delete_timer_button">Delete</button>
+                    </div>
+                {% endif %}
+            </div> 
+        </div>
+    {% endfor %}
+{% endif %}

@@ -64,6 +64,9 @@ def task_detail(request):
 
             task_timer_list = task.tasktimer_set.all()
 
+            if not task_timer_list:
+                task_timer_list = False
+
             context = {'task': task, "task_timer_list": task_timer_list}
             return render(request, 'time_tracker/task_detail.html', context)
     
