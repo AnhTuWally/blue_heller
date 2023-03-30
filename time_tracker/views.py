@@ -289,3 +289,24 @@ def edit_task_timer(request):
                                 'end_time': end_time,
                                 'duration': task_timer.duration})
     return HttpResponseBadRequest('Invalid method')
+
+
+def timeline(request):
+
+    context={}
+
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if is_ajax:
+        if request.method == 'POST':
+            data = request.POST
+
+            project_id = data.get('project_id', None) 
+
+            active_tasks = ActiveTask.objects.all()
+
+            task_timers = TaskTimer.objects.filter(project__id=project_id)
+
+            context['active_tasks'] = active_tasks if active_tasks else False
+            context['task_timers'] = task_timers if task_timers else False
+    
+    return render(request, 'time_tracker/timeline.html', context) 

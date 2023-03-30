@@ -1,0 +1,109 @@
+<div id="visualization"></div>
+<script type="text/javascript">
+    // DOM element where the Timeline will be attached
+    var container = document.getElementById('visualization');
+
+    // Create a DataSet (allows two way data-binding)
+
+    var current_time = new Date().getTime();
+    // get three hours ealier of current_time
+
+    var time_delta = 3 * 60 * 60 * 1000;
+    var start_time = current_time - time_delta;
+    var end_time = current_time + time_delta;
+
+    var items = new vis.DataSet([]);
+
+    // Configuration for the Timeline
+    {% if task_timers %}
+        {% for timer in task_timers %}
+            var item = {
+                id: "{{ timer.id }}",
+                content: '{{ timer.task.project.name }} - {{ timer.task.name }}',
+                start: '{{ timer.start_time.isoformat }}',
+                end: '{{ timer.end_time.isoformat }}',
+                group: '{{ timer.task.project.id }}'
+            };
+            items.add(item);
+        {% endfor %}
+    {% endif %}
+
+    {% if active_tasks %}
+        {% for task in active_tasks %}
+            var item = {
+                id: "{{ task.id }}",
+                content: '{{ task.project.name }} - {{ task.name }}',
+                start: '{{ task.start_time.isoformat }}',
+                group: '{{ task.project.id }}',
+                style: 'background-color: #ff6961;color:#fff',
+                subgroup: '{{task.id}}'
+            };
+            items.add(item);
+            console.log(item)
+        {% endfor %}
+
+    {% endif %}
+
+    var options = {'showCurrentTime': true,
+    'start': start_time,
+    'end': end_time,
+    zoomMin: 1000 * 60,
+    stack: false,
+    };
+
+    // Create a Timeline
+    var timeline = new vis.Timeline(container, items, options);
+
+    function get_current_time() {
+        var current_time = timeline.getCurrentTime();
+        timeline.moveTo(current_time);
+    }
+
+
+    function add_item(id, content, start_time, end_time) {
+        var current_time = timeline.getCurrentTime();
+        var item = {
+            id: 1,
+            content: 'item 1',
+            start: current_time,
+            editable: true,
+        };
+
+        if (end_time){
+            item.end = end_time;
+        }
+
+        items.add(item);
+        timeline.setItems(items);
+    }
+
+    function update_item_stop_time(id) {
+        var current_time = timeline.getCurrentTime();
+
+        start_time = items.get(id).start;
+        content = items.get(id).content;
+
+        console.log(start_time);
+
+        var item = {
+            id: id,
+            content: content,
+            start: start_time,
+            end: current_time,
+        };
+
+        items.update(item);
+    }
+    function update_active_task() {
+        {% if active_tasks %}
+            {% for task in active_tasks %}
+                update_item_stop_time('{{ task.id }}');
+            {% endfor %}
+        {% endif %}
+    }
+
+    setInterval(update_active_task, 1000);
+</script>
+
+<button onclick="get_current_time()">Current Time</button>
+<button onclick="add_item()">add new</button>

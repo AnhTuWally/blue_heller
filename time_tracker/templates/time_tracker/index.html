@@ -6,6 +6,10 @@
         <script type="text/javascript" src="{% static 'jquery-3.6.4.min.js' %}"></script> 
         <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 
+
+        <script type="text/javascript" src="{% static 'vis-timeline-graph2d.min.js' %}"></script>
+        {% comment %} <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" /> {% endcomment %}
+
         <script type="text/javascript">
 
             function create_project() {
@@ -16,7 +20,6 @@
                     return;
                 }
 
-                console.log(project_name)
                 $.ajax({
                     type: "POST",
                     url: "{% url 'time_tracker:create_project' %}",
@@ -80,7 +83,6 @@
             function delete_project(element) {
                 var project_id = $(element).attr("project_id");
 
-                console.log(project_name)
                 $.ajax({
                     type: "POST",
                     url: "{% url 'time_tracker:delete_project' %}",
@@ -116,6 +118,7 @@
                         $('#project_detail_modal').html(response);
                         $('#project_detail_modal').attr('project_id', project_id);
                         connect_task_event();
+                        load_timeline(project_id);
                     },
                     error: function (response) {
                         console.log(response);
@@ -152,7 +155,6 @@
                 var task_name = $("#task_name").val();
                 var project_id = $('#project_detail_modal').attr('project_id');
                 
-                console.log(project_id)
 
                 if(task_name == ""){
                     alert("Please enter a task name");
@@ -185,7 +187,6 @@
                 var task_id = $(element).attr('task_id');
                 var user_id = $('.current_user').attr('user_id');
 
-                console.log(user_id)
                 
                 if(task_id == ""){
                     alert("no valid task id");
@@ -379,7 +380,6 @@
                 
                 var note_id= $(element).attr('note_id');
 
-                console.log(note_id)
 
                 $.ajax({
                     type: "POST",
@@ -494,7 +494,6 @@
             function open_project(element) {
                 var project_id = $(element).attr('project_id');
 
-                console.log(project_id)
                 
                 $.ajax({
                     type: "POST",
@@ -513,7 +512,8 @@
                         $("#task_detail_modal").hide();
                         set_activated_project(project_id);
 
-                        connect_task_event()
+                        connect_task_event();
+                        load_timeline(project_id);
                     },
                     error: function (response) {
                         console.log(response);
@@ -526,6 +526,27 @@
                 $('.open_project_button[project_id='+project_id+']').addClass('activated_project');
             }
 
+            function load_timeline(project_id) {
+                
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'time_tracker:timeline' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'project_id': project_id
+                    },
+
+                    success: function (response) {
+                        $("#timeline-container").html(response);
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
 
             function load_notes(element) {
                 var project_id = $(element).attr('project_id');
@@ -649,13 +670,12 @@
                     create_user();
                 });
 
+
                 console.log("ready");
 
                 setInterval(timer, 1000);
             })
 
-
-            
 
         </script>
 
@@ -726,6 +746,11 @@
                 margin:10px;
             }
 
+            .card{
+                background: #3e4057;
+                color: #fff;
+            }
+
         </style>
     </head>
 
@@ -774,5 +799,7 @@
             </div>
         </div>
 
-         </body>
+        <div id='timeline-container'>
+        </div>
+        </body>
 </html>

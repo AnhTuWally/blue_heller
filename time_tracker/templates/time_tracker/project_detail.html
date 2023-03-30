@@ -3,10 +3,28 @@
         display:flex;
         align-item:center;
         justify-content:space-between;
+        flex-wrap:wrap;
     }
     .active_task_view div{
         padding: 5px;
     }
+
+    .active_task_path{
+        display:flex;
+        flex-wrap:wrap;
+        justify-content:flex-start;
+    }
+
+    .task_action_container{
+        style="display:flex;
+        flex-direction:row;
+        justify-content:center"
+    }
+
+    .task_action_container button{
+        margin:5px;
+    }
+
 </style>
 
 <div style="display:flex;flex-direction:column">
@@ -14,12 +32,12 @@
         <div class="card-header" >
             Project Name : {{project.name}}
         </div>
-        <div class="card-body" style="display:flex;">
-            <div class="col-10">
-                <input type="text" class="form-control" id="task_name" placeholder="start something">
+        <div class="card-body" style="display:flex;flex-wrap:wrap;justify-content:center">
+            <div style="margin:10px;flex-grow:3;">
+                <input type="text" id="task_name" placeholder="start something" style="width:100%">
             </div>
-            <div class="col-2">
-                <button type="submit" class="btn btn-primary" id="create_task_button">Create</button>
+            <div style="margin:10px;">
+                <button type="submit" class="btn btn-primary" id="create_task_button" >Create</button>
             </div>
         </div>
     </div>
@@ -35,7 +53,7 @@
                             <div>
                                 Total Time : {{task.total_time_str}}
                             </div>
-                            <div style="display:flex; flex-direction:row; justify-content:center">
+                            <div class="task_action_container" >
                                 <button type="submit" task_id="{{task.id}}" class="start_task_button">Start</button>
                                 <button type="submit" task_id="{{task.id}}" class="delete_task_button btn-danger">delete</button>
                             </div>
@@ -52,15 +70,15 @@
     <div class='active_task' style='border:solid 1px black;'>
         {% for active_task in active_tasks %}
             <div class='active_task_view'>
-
-                <div>
-                    <button class="open_project_button" project_id = {{active_task.project.id}} >
-                        {{active_task.project.name}}
-                    </button>
-                </div>
-
-                <div>
-                    <button class="view_task_button" task_id={{active_task.task.id}}>{{ active_task.task.name }}</button>
+                <div class='active_task_path'>
+                    <div>
+                        <button class="open_project_button" project_id = {{active_task.project.id}} >
+                            {{active_task.project.name}}
+                        </button>
+                    </div>
+                    <div>
+                        <button class="view_task_button" task_id={{active_task.task.id}}>{{ active_task.task.name }}</button>
+                    </div>
                 </div>
 
                 <div>
@@ -78,4 +96,5 @@
             </div>
         {% endfor %}
     </div>
+
 </div>

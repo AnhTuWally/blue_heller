@@ -17,4 +17,5 @@ urlpatterns = [
     path(r'stop_task_timer', views.stop_task_timer, name='stop_task_timer'),
     path(r'delete_task_timer', views.delete_task_timer, name='delete_task_timer'),
     path(r'edit_task_timer', views.edit_task_timer, name='edit_task_timer'),
+    path(r'timeline', views.timeline, name='timeline'),
 ]
