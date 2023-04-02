@@ -18,4 +18,6 @@ urlpatterns = [
     path(r'delete_task_timer', views.delete_task_timer, name='delete_task_timer'),
     path(r'edit_task_timer', views.edit_task_timer, name='edit_task_timer'),
     path(r'timeline', views.timeline, name='timeline'),
+    path(r'set_project_status', views.set_project_status, name='set_project_status'),
+    path(r'set_task_status', views.set_task_status, name='set_task_status'),
 ]

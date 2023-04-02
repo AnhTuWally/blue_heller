@@ -9,6 +9,7 @@ class Task(BaseModel):
 
     name = models.CharField(null=True, blank=True, max_length=100)
     description = models.CharField(null=True, blank=True, max_length=500)
+    status = models.ForeignKey('status.TaskStatus', on_delete=models.SET_NULL, null=True, blank=True)
 
     @property
     def total_time(self):

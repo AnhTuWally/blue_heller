@@ -8,6 +8,9 @@ from django.utils.dateparse import parse_datetime
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse 
 
 from .models import Project, Task, TaskTimer, ActiveTask
+
+from status.models import ProjectStatus, TaskStatus, NoteStatus
+
 from user.models import User
 
 from datetime import timedelta
@@ -35,8 +38,9 @@ def project_detail(request):
 
             project_id = data.get('project_id', None)
 
-
-            print(project_id)
+            project_statuses = ProjectStatus.objects.all()
+            task_statuses = TaskStatus.objects.all()
+            note_statuses = NoteStatus.objects.all()
 
             project = Project.objects.get(id=project_id)
 
@@ -46,7 +50,9 @@ def project_detail(request):
             active_tasks = ActiveTask.objects.all()
             task_list = project.task_set.all()
 
-            context = {'project': project, "task_list": task_list, "active_tasks": active_tasks}
+            context = {'project': project, "task_list": task_list, "active_tasks": active_tasks,
+                       "project_statuses": project_statuses, "task_statuses": task_statuses,
+                       "note_statuses": note_statuses}
             return render(request, 'time_tracker/project_detail.html', context)
 
 
@@ -300,13 +306,70 @@ def timeline(request):
         if request.method == 'POST':
             data = request.POST
 
+            active_tasks = ActiveTask.objects.all()
             project_id = data.get('project_id', None) 
 
-            active_tasks = ActiveTask.objects.all()
-
-            task_timers = TaskTimer.objects.filter(project__id=project_id)
+            if project_id == 'all':
+                task_timers = TaskTimer.objects.all()
+            else:
+                task_timers = TaskTimer.objects.filter(project__id=project_id)
 
             context['active_tasks'] = active_tasks if active_tasks else False
             context['task_timers'] = task_timers if task_timers else False
     
     return render(request, 'time_tracker/timeline.html', context) 
+
+
+def set_project_status(request):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if is_ajax:
+        if request.method == 'POST':
+            data = request.POST
+
+            project_id = data.get('project_id', None)
+            project_status_id = data.get('project_status_id', None)
+
+            if project_id is None:
+                return HttpResponseBadRequest('Invalid project id')
+
+            if project_status_id is None:
+                return HttpResponseBadRequest('Invalid project status id')
+
+            project = Project.objects.get(id=project_id)
+
+            status = ProjectStatus.objects.get(id=project_status_id)
+
+
+            project.status = status
+            project.save()
+
+            return HttpResponse('Success')
+
+    return HttpResponseBadRequest('Invalid method')
+
+
+def set_task_status(request):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if is_ajax:
+        if request.method == 'POST':
+            data = request.POST
+
+            task_id = data.get('task_id', None)
+            task_status_id = data.get('task_status_id', None)
+
+            if task_id is None:
+                return HttpResponseBadRequest('Invalid task id')
+
+
+            if task_status_id is None:
+                return HttpResponseBadRequest('Invalid task status id')
+
+            task = Task.objects.get(id=task_id)
+            status = TaskStatus.objects.get(id=task_status_id)
+
+            task.status = status
+            task.save()
+
+            return HttpResponse('Success')
+
+    return HttpResponseBadRequest('Invalid method')

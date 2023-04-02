@@ -40,6 +40,7 @@
                 });
             }
 
+
             function filter_project(){
                 var project_name = $('#project_name').val();
                 var project_counter = 0;
@@ -98,6 +99,48 @@
                     },
                     error: function (response) {
                         console.log(response);
+                    }
+                });
+            }
+
+            function set_project_status(project_id, project_status_id){
+                $.ajax({
+                    url: "{% url 'time_tracker:set_project_status' %}",
+                    type: 'POST',
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        project_id: project_id,
+                        project_status_id: project_status_id 
+                    },
+                    success: function (data) {
+                        console.log(data);
+                    },
+                    error: function (data) {
+                        console.log(data);
+                    }
+                });
+            }
+
+            function set_task_status(task_id, task_status_id){
+                $.ajax({
+                    url: "{% url 'time_tracker:set_task_status' %}",
+                    type: 'POST',
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'task_id': task_id,
+                        'task_status_id': task_status_id 
+                    },
+                    success: function (data) {
+                        console.log(data);
+                    },
+                    error: function (data) {
+                        console.log(data);
                     }
                 });
             }
@@ -433,6 +476,8 @@
                 $('.delete_task_button').unbind();
                 $('.view_task_button').unbind();
 
+                $('#project_status').unbind();
+
             }
 
             function connect_task_event(){
@@ -473,6 +518,18 @@
 
                 $(".delete_task_button").click(function () {
                     delete_task(this);
+                });
+
+                $('#project-status').change(function () {
+                    var project_id = $('#project_detail_modal').attr('project_id');
+                    var project_status_id = $(this).val();
+                    set_project_status(project_id, project_status_id);
+                });
+
+                $('.task-status').change(function () {
+                    var task_id = $(this).attr('task_id');
+                    var task_status_id = $(this).val();
+                    set_task_status(task_id, task_status_id);
                 });
             }
 
@@ -524,6 +581,28 @@
             function set_activated_project(project_id){
                 $('.open_project_button').removeClass('activated_project');
                 $('.open_project_button[project_id='+project_id+']').addClass('activated_project');
+            }
+
+
+            function load_status(status_id) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'status:status_detail' %}",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: {
+                        'status_id': status_id,
+                    },
+                    success: function (response) {
+                        $("#status_detail_modal").html(response);
+                        $("#status_detail_modal").attr('status_id', status_id);
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
             }
 
             function load_timeline(project_id) {
@@ -670,6 +749,9 @@
                     create_user();
                 });
 
+                load_timeline('all');
+
+                load_status('all')
 
                 console.log("ready");
 
@@ -746,6 +828,7 @@
                 margin:10px;
             }
 
+
             .card{
                 background: #3e4057;
                 color: #fff;
@@ -799,7 +882,10 @@
             </div>
         </div>
 
-        <div id='timeline-container'>
+        <div id='timeline-container' timeline_interval_id = ''>
         </div>
-        </body>
+
+        <div id='status_detail_modal'>
+        </div>
+    </body>
 </html>

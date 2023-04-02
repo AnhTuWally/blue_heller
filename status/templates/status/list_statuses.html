@@ -1,0 +1,179 @@
+<style>
+    #new_status{
+        display: flex;
+        margin: 10px;
+        flex-direction: column;
+        max-width: 500px;
+        justify-content: center;
+        align-items: center;
+    }
+    #new_status div{
+        color: #fff;
+    }
+    #status-options-container{
+        display: flex;
+        margin:10px;
+        flex-wrap: wrap;
+    }
+    #status-options-container div{
+        margin:10px;
+    }
+
+
+    #status_container{
+        overflow:scroll;
+        max-height:500px;  
+        border:solid 2px #ded70d;
+        display:flex;
+        padding:10px;
+        margin:10px;
+        flex-wrap:wrap;
+    }
+
+    .badge{
+        cursor: pointer;
+        margin: 10px;
+    }
+</style>
+
+<script>
+    function create_status(){
+        status_name = $('#status_name').val();
+
+        project_status = $('#project_status_checkbox').is(':checked');
+        task_status = $('#task_status_checkbox').is(':checked');
+        note_status = $('#note_status_checkox').is(':checked');
+
+        $.ajax({
+            url: "{% url 'status:create_status' %}",
+
+            type: 'POST',
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            data: {
+                'status_name': status_name,
+                'project_status': project_status,
+                'status_description': '',
+                'task_status': task_status,
+                'note_status': note_status,
+            },
+            success: function(response){
+                console.log(response);
+            },
+            error: function(response){
+                console.log(response);
+            }
+        });
+    }
+
+    function toggle_status(status_id, status_type){
+        $.ajax({
+            url: "{% url 'status:toggle_status' %}",
+            type: 'POST',
+            headers:{
+                "X-Requested-With": "XMLHttpRequest",
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            data: {
+                'status_id': status_id,
+                'status_type': status_type,
+            },
+            success: function(response){
+                console.log(response);
+            },
+            error: function(response){
+                console.log(response);
+            }
+        });
+    }
+
+    $(document).ready(function(){
+        $('#add_status').click(function(){
+            create_status();
+        });
+
+        $('.project_status').click(function(){
+            status_id = $(this).attr('status_id');
+            toggle_status(status_id, 'project_status');
+        });
+
+        $('.task_status').click(function(){
+            status_id = $(this).attr('status_id');
+            toggle_status(status_id, 'task_status');
+        });
+
+        $('.note_status').click(function(){
+            status_id = $(this).attr('status_id');
+            toggle_status(status_id, 'note_status');
+        });
+    });
+</script>
+
+<div id='new_status'>
+    {% comment %} text input for stauts name {% endcomment %}
+    <label for='status_name'>Name</label>
+    <input type='text' id='status_name' name='status_name' class='form-control' placeholder='Status Name' required>
+    {% comment %} checkbox for project status {% endcomment %}
+    <div id='status-options-container'>
+        <div class='form-check'>
+            <input class='form-check-input' type='checkbox' value='' id='project_status_checkbox'>
+            <label class='form-check-label' for='project_status_checkbox'>
+                Project Status
+            </label>
+        </div >
+        {% comment %} checkbox for task status {% endcomment %}
+        <div class='form-check'>
+            <input class='form-check-input' type='checkbox' value='' id='task_status_checkbox'>
+            <label class='form-check-label' for='task_status_checkbox'>
+                Task Status
+            </label>
+        </div>
+        <div class='form-check'>
+            <input class='form-check-input' type='checkbox' value='' id='note_status_checkox'>
+            <label class='form-check-label' for='note_status_checkox'>
+                Note Status
+            </label>
+        </div>
+    </div>
+    <div>
+        <button type='button' class='btn btn-primary' id='add_status'>Add Status</button>
+    </div>
+</div>
+<div id='status_container'>
+    {% for master_status in master_statuses %}
+        <div class='card' status_name = {{master_status.name}}>
+            <div class='card-header'>
+                <h3 class='card-title'>{{ master_status.name }}</h3>
+            </div>
+            <div class='card-body'>
+                <div class='project_status' status_id='{{master_status.id}}'>
+                    Project Status:
+                    {% if master_status.project_status %}
+                        <span class='badge badge-success' >Created</span>
+                    {% else %}
+                        <span class='badge badge-danger'>Not Set</span>
+                    {% endif %}
+                </div>
+                <div class='task_status' status_id='{{master_status.id}}'>
+                    Task Status:
+                    {% if master_status.task_status%}
+                        <span class='badge badge-success'>Created</span>
+                    {% else %}
+                        <span class='badge badge-danger'>Not Set</span>
+                    {% endif %}
+                </div>
+                <div class='note_status' status_id='{{master_status.id}}'>
+                    Note Status:
+                    {% if master_status.note_status%}
+                        <span class='badge badge-success'>Created</span>
+                    {% else %}
+                        <span class='badge badge-danger'>Not Set</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+

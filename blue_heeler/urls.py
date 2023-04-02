@@ -20,5 +20,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('time_tracker/', include('time_tracker.urls')),
-    path('sticky_note', include('sticky_note.urls')),
+    path('sticky_note/', include('sticky_note.urls')),
+    path('status/', include('status.urls')),
 ]

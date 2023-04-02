@@ -27,12 +27,34 @@
 
 </style>
 
+
+
 <div style="display:flex;flex-direction:column">
     <div class='card'>
         <div class="card-header" >
             Project Name : {{project.name}}
         </div>
-        <div class="card-body" style="display:flex;flex-wrap:wrap;justify-content:center">
+        <div class="card-body" style="display:flex;flex-direction:column;justify-content:center">
+
+            <div style="margin:10px;flex-grow:3;">
+                <label>Project Status</label>
+                <select name='project-status' id='project-status' style='min-width:50px;'>
+                    {% comment %} TODO: Might be able to optimize this part with some js or clever html trick {% endcomment %}
+                    {% if not project.status %} 
+                        <option value={{project_status.id}} selected='selected'></option>
+                    {% else %}
+                        <option value={{project_status.id}}></option>
+                    {% endif %}
+                    {% for project_status in project_statuses %}
+                        {% if project.status and project.status.id == project_status.id %}
+                            <option value={{project_status.id}} selected='selected'>{{project_status.name}}</option>
+                        {% else %}
+                            <option value={{project_status.id}}>{{project_status.name}}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            
             <div style="margin:10px;flex-grow:3;">
                 <input type="text" id="task_name" placeholder="start something" style="width:100%">
             </div>
@@ -50,6 +72,24 @@
                             <button class="view_task_button" task_id={{task.id}}>{{ task.name }}</button>
                         </div>
                         <div class="card-body">
+                            <div>
+                                Status : 
+                                <select class='task-status' task_id={{task.id}}>
+                                    {% if not task.status %}
+                                        <option value={{task_status.id}} selected='selected'></option>
+                                    {% else %}
+                                        <option value={{task_status.id}}></option>
+                                    {% endif %}
+
+                                    {% for task_status in task_statuses %}
+                                        {% if task.status and task.status.id == task_status.id%}
+                                            <option value={{task_status.id}} selected='selected'>{{task_status.name}}</option>
+                                        {% else %}
+                                            <option value={{task_status.id}} >{{task_status.name}}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
                             <div>
                                 Total Time : {{task.total_time_str}}
                             </div>

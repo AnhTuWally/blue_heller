@@ -22,7 +22,8 @@
                 content: '{{ timer.task.project.name }} - {{ timer.task.name }}',
                 start: '{{ timer.start_time.isoformat }}',
                 end: '{{ timer.end_time.isoformat }}',
-                group: '{{ timer.task.project.id }}'
+                group: '{{ timer.task.project.id }}',
+                subgroup: '{{timer.task.project.id}}'
             };
             items.add(item);
         {% endfor %}
@@ -39,7 +40,6 @@
                 subgroup: '{{task.id}}'
             };
             items.add(item);
-            console.log(item)
         {% endfor %}
 
     {% endif %}
@@ -79,11 +79,13 @@
 
     function update_item_stop_time(id) {
         var current_time = timeline.getCurrentTime();
-
-        start_time = items.get(id).start;
+        try {
+            var start_time = items.get(id).start;
+        } catch (e) {
+            console.log(`Warning: Trying to update time in timeline for item with ${id} not found`)
+            return;
+        }
         content = items.get(id).content;
-
-        console.log(start_time);
 
         var item = {
             id: id,
@@ -102,7 +104,16 @@
         {% endif %}
     }
 
-    setInterval(update_active_task, 1000);
+
+    {% comment %} TODO: when a task is stop using this interval_id to stop the inteval using clearInterval(interval_id) {% endcomment %}
+    curr_interval_id = $('#timeline-container').attr('timeline_interval_id');
+    if(curr_interval_id != ''){
+        clearInterval(curr_interval_id);
+    }
+
+    interval_id = setInterval(update_active_task, 1000);
+
+    $('#timeline-container').attr('timeline_interval_id', interval_id);
 </script>
 
 <button onclick="get_current_time()">Current Time</button>
