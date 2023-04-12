@@ -1,0 +1,36 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}Blue Heeler Management System{% endblock %}</title>
+        {% load static %}
+
+        {% block styles %}
+            <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+            <style>
+                body {
+                    background-color: #1a1a1a;
+                }
+            </style>
+        {% endblock %}
+
+        {% block extra-css %}
+        {% endblock %}
+
+        {% block scripts %}
+            <script type="text/javascript" src="{% static 'jquery-3.6.4.min.js' %}"></script> 
+            <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'vis-timeline-graph2d.min.js' %}"></script>
+        {% endblock %}
+
+        {% block extra-js%}
+        {% endblock %}
+    </head>
+    <body>
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+    </body>
+</html>

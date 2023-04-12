@@ -12,7 +12,6 @@ urlpatterns = [
     path(r'delete_project', views.delete_project, name='delete_project'),
     path(r'create_task', views.create_task, name='create_task'),
     path(r'delete_task', views.delete_task, name='delete_task'),
-    path(r'create_user', views.create_user, name='create_user'),
     path(r'create_task_timer', views.create_task_timer, name='create_task_timer'),
     path(r'stop_task_timer', views.stop_task_timer, name='stop_task_timer'),
     path(r'delete_task_timer', views.delete_task_timer, name='delete_task_timer'),

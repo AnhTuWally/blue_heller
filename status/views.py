@@ -55,12 +55,23 @@ def toggle_status(request):
             
             status = MasterStatus.objects.get(id=status_id)
 
+            state = {'project_status': False, 'task_status': False, 'note_status': False}
+            if status.project_status:
+                state['project_status'] = True
+            
+            if status.task_status:
+                state['task_status'] = True
+
+            if status.note_status:
+                state['note_status'] = True
+
             if status_type == 'project_status':
                 if status.project_status:
                     status.project_status.delete()
                 else:
                     status.create_project_status()
                     status.save()
+                state['project_status'] = not state['project_status'] 
             
             if status_type == 'task_status':
                 if status.task_status:
@@ -68,6 +79,7 @@ def toggle_status(request):
                 else:
                     status.create_task_status()
                     status.save()
+                state['task_status'] = not state['task_status']
 
             if status_type == 'note_status':
                 if status.note_status:
@@ -75,9 +87,10 @@ def toggle_status(request):
                 else:
                     status.create_note_status()
                     status.save()
+                state['note_status'] = not state['note_status']
 
 
-            return HttpResponse('Status Modified')
+            return JsonResponse(state)
 
     return HttpResponseBadRequest('Invalid method')
 

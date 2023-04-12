@@ -82,6 +82,37 @@
             },
             success: function(response){
                 console.log(response);
+                console.log(`.project_status[status_id='${status_id}']`)
+
+                if(response.project_status){
+                    $(`.project_status[status_id='${status_id}'] span`).text('Created');
+                    $(`.project_status[status_id='${status_id}'] span`).addClass('badge-success');
+                    $(`.project_status[status_id='${status_id}'] span`).removeClass('badge-danger');
+                }else{
+                    $(`.project_status[status_id='${status_id}'] span`).text('Not Set');
+                    $(`.project_status[status_id='${status_id}'] span`).addClass('badge-danger');
+                    $(`.project_status[status_id='${status_id}'] span`).removeClass('badge-success');
+                }
+
+                if(response.task_status){
+                    $(`.task_status[status_id='${status_id}'] span`).addClass('badge-success');
+                    $(`.task_status[status_id='${status_id}'] span`).removeClass('badge-danger');
+                    $(`.project_status[status_id='${status_id}'] span`).html('Created');
+                }else{
+                    $(`.task_status[status_id='${status_id}'] span`).addClass('badge-danger');
+                    $(`.task_status[status_id='${status_id}'] span`).removeClass('badge-success');
+                    $(`.project_status[status_id='${status_id}'] span`).html('Not Set');
+                }
+
+                if(response.note_status){
+                    $(`.note_status[status_id='${status_id}'] span`).addClass('badge-success');
+                    $(`.note_status[status_id='${status_id}'] span`).removeClass('badge-danger');
+                    $(`.project_status[status_id='${status_id}'] span`).html('Created');
+                }else{
+                    $(`.note_status[status_id='${status_id}'] span`).addClass('badge-danger');
+                    $(`.note_status[status_id='${status_id}'] span`).removeClass('badge-success');
+                    $(`.project_status[status_id='${status_id}'] span`).html('Not Set');
+                }
             },
             error: function(response){
                 console.log(response);

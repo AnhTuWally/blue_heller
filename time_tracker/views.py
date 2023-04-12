@@ -20,11 +20,8 @@ from datetime import timedelta
 def index(request):
     project_list = Project.objects.all()
 
-    current_user = User.objects.first()
 
-
-    context = {'project_list': project_list, 'title': 'Time Tracker - Project List', 
-               'current_user': current_user}
+    context = {'project_list': project_list, 'title': 'Time Tracker - Project List'}
     
     return render(request, 'time_tracker/index.html', context) 
 
@@ -120,22 +117,6 @@ def create_project(request):
     return HttpResponseBadRequest('Invalid method')
 
 
-def create_user(request):
-    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-    if is_ajax:
-        if request.method == 'POST':
-            data = request.POST
-
-            username = data.get('username', None)
-
-            project, created = User.objects.get_or_create(name=username)
-            project.save()
-
-            return HttpResponse(username)
-
-    return HttpResponseBadRequest('Invalid method')
-
-
 
 def create_task(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -173,7 +154,7 @@ def create_task_timer(request):
             data = request.POST
 
             task_id = data.get('task_id', None)
-            user_id= data.get('user_id', None)
+            user_id = data.get('user_id', None)
 
             user = User.objects.get(id=user_id)
 
