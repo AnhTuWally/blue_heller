@@ -1,0 +1,44 @@
+<div class='card'>
+    <div clas='card-header'>
+        <input type="text" id="new_todo_name" placeholder='Tudo: '>
+    </div>
+    <div class='card-body'>
+        <div>
+            <div id="priority-container">
+                <input id="todo_priority_value" type="range" min="0" max="100" value="50" class="slider">
+            </div>   
+
+            <div id="the-basics">
+                <input class="typeahead" id='task_name_input' type="text" placeholder="Task Name">
+                <input id='hidden_task_id' type="hidden" value=''>
+            </div>
+
+        </div>
+
+        <div>
+            <button id="create_todo">Create Todo</button>
+        </div>
+    </div>
+</div>
+
+<div class="todos-container">
+    {% if todos %}
+        {% for todo in todos %}
+            <div class='todo-item'>
+                <input type="checkbox" class="todo-checkbox" id="checkbox-{{ todo.id }}" value="is_done" todo_id={{ todo.id }} {% if todo.is_done %} checked {% endif %}>
+                <label for="checkbox-{{ todo.id }}"> {{ todo.name }} </label>| 
+                <button class="todo-task" todo_id={{ todo.id }}>
+                    {% if todo.task %}
+                        {{ todo.task.name }}
+                    {% else %}
+                        None
+                    {% endif %} 
+                </button> | 
+                {{ todo.priority  }} |
+
+                <button class="todo-delete btn-danger" todo_id={{ todo.id }}>x</button>
+
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>

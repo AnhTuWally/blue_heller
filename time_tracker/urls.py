@@ -19,4 +19,9 @@ urlpatterns = [
     path(r'timeline', views.timeline, name='timeline'),
     path(r'set_project_status', views.set_project_status, name='set_project_status'),
     path(r'set_task_status', views.set_task_status, name='set_task_status'),
+    path(r'todo_detail', views.todo_detail, name='todo_detail'),
+    path(r'create_todo', views.create_todo, name='create_todo'),
+    path(r'delete_todo', views.delte_todo, name='delete_todo'),
+    path(r'update_todo', views.update_todo, name='update_todo'),
+    path(r'list_tasks', views.TaskView.as_view(), name='list_tasks'),
 ]

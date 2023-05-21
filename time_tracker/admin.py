@@ -1,9 +1,11 @@
 from django.contrib import admin
 
-from .models import Project, Task, TaskTimer, ActiveTask
+from .models import Project, Task, TaskTimer, ActiveTask, Todo
 
 # Register your models here.
 admin.site.register(Project)
 admin.site.register(Task)
 admin.site.register(TaskTimer)
 admin.site.register(ActiveTask)
+admin.site.register(Todo)
+

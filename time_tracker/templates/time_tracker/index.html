@@ -72,6 +72,7 @@
             
                 connect_task_event();
                 load_timeline(project_id);
+                load_todo(project_id);
             }
 
             const error_callback = function(response){
@@ -98,6 +99,7 @@
             
                 connect_task_event();
                 load_timeline(project_id);
+                load_todo(project_id);
             }
 
             const error_callback = function(response){
@@ -484,6 +486,164 @@
         }
 
 
+        function update_todo(element){
+            var todo_id = $(element).attr('todo_id');
+
+            var is_done = $(element).is(':checked');
+
+
+            console.log(`TODO_ID: ${todo_id} is set to ${is_done}`)
+
+            var data = {
+                'todo_id': todo_id,
+                'is_done': is_done,
+            }
+
+            const success_callback = function(response){
+                console.log('success');
+            }
+
+            const error_callback = function(response){
+                console.log(response);
+            }
+
+            ajax_post_request("{% url 'time_tracker:update_todo' %}", 
+                            "{{ csrf_token }}", data, success_callback, error_callback);
+        }
+
+        function load_todo(project_id){
+    
+            var data = {
+                'project_id': project_id,
+            }
+            
+            const success_callback = function(response){
+                console.log('success');
+                $("#todo_detail_modal").html(response);
+                
+                $(".todo-checkbox").unbind();
+                $(".todo-checkbox").click(function (){
+                    update_todo(this)
+                });
+
+
+                $(".todo-delete").unbind();
+                $(".todo-delete").click(function (){
+                    delete_todo(this)
+                });
+                
+                $('#create_todo').unbind();
+                $("#create_todo").click(function () {
+                    create_todo();
+                });
+                
+                var titlesDisplay = new Bloodhound({
+                    datumTokenizer: function (d) {return Bloodhound.tokenizers.obj.whitespace(d.name); },
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "{% url 'time_tracker:list_tasks' %}",
+                        replace: function(url, query) {
+                            return url + "?query=" + query;
+                        }
+                    }
+                });
+
+                
+                $('#the-basics .typeahead').typeahead({
+                    highlight: true,
+                    minLength: 0,
+                    hint: true,
+                },{
+                    displayKey: 'name',
+                    source: titlesDisplay.ttAdapter(),
+                });
+
+                $('.typeahead').on('typeahead:selected', function(e, datum) {
+                    $('#task_name_input').typeahead('val', datum.name); //Use the typeahead api to override default behaviour of setting the typeaheads value to the datums value ie from "21" to "Twenty one"
+                    $('#hidden_task_id').val(datum.value); //set the hidden inputs value to the datum value eg. "21"
+                    console.log($('#hidden_task_id').val());
+                });
+            }
+
+            const error_callback = function(response){
+                console.log(response);
+            }
+
+            ajax_post_request("{% url 'time_tracker:todo_detail' %}", 
+                            "{{ csrf_token }}", data, success_callback, error_callback);
+        }
+
+
+        function create_todo(){
+            todo_name = $('#new_todo_name').val().trim(); 
+            priority_value = $('#todo_priority_value').val();
+            todo_task_id = $('#hidden_task_id').val();
+
+
+            var project_id = $('#project_detail_modal').attr('project_id');
+
+
+            if(project_id == ''){
+                project_id = null;
+            }
+
+            if(todo_task_id == ''){
+                todo_task_id = null;
+            }
+
+            data = {"todo_name": todo_name, 
+                    "priority": priority_value, 
+                    "task_id": todo_task_id,
+                    "project_id": project_id}
+            
+            const success_callback = function(response){
+                console.log('todo_created');
+
+                load_todo(project_id);
+                {% comment %} # TODO  created {% endcomment %}
+            }
+
+            const error_callback = function(response){
+                console.log(response);
+            }
+
+            console.log("creating todo");
+
+            ajax_post_request("{% url 'time_tracker:create_todo' %}", 
+                            "{{ csrf_token }}", data, success_callback, error_callback);
+
+        }
+
+        function delete_todo(element){
+            var todo_id = $(element).attr('todo_id');
+            var project_id = $('#project_detail_modal').attr('project_id');
+
+
+            if(project_id == ''){
+                project_id = null;
+            }
+
+
+            var data = {
+                'todo_id': todo_id,
+            }
+
+
+            const success_callback = function(response){
+                console.log('success');
+                load_todo(project_id);
+            }
+
+            const error_callback = function(response){
+                console.log(response);
+            }
+
+            ajax_post_request("{% url 'time_tracker:delete_todo' %}", 
+                            "{{ csrf_token }}", data, success_callback, error_callback);
+        }
+
+
+
         $(document).ready(function() {
             $("#create_project_button").click(function () {
                 console.log("Sending request to create project");
@@ -507,6 +667,8 @@
             load_timeline('all');
 
             load_status('all')
+
+            load_todo(null);
 
             console.log("ready");
 
@@ -587,6 +749,104 @@
             color: #fff;
         }
 
+        .todo-item{
+            background: #3e4057;
+            color: #fff;
+            padding:10px;
+            margin:10px;
+        }
+
+        .todos-container{
+            display: flex;
+            flex-wrap: wrap;
+            margin: 10px;
+            border: 1px solid black;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        input.todo-checkbox[type=checkbox] {
+            width: 15px;
+            height: 15px;
+        }
+        
+        {% comment %} https://developer.mozilla.org/en-US/docs/Web/CSS/:checked {% endcomment %}
+        input.todo-checkbox[type=checkbox]:checked + label {  
+            {% comment %} box-shadow: 0 0 0 3px green; {% endcomment %}
+            color: #d1d5ed;
+            text-decoration: line-through;
+        }
+
+        .typeahead,
+        .tt-query,
+        .tt-hint {
+          width: 396px;
+          height: 30px;
+          padding: 8px 12px;
+          font-size: 24px;
+          line-height: 30px;
+          border: 2px solid #ccc;
+          -webkit-border-radius: 8px;
+             -moz-border-radius: 8px;
+                  border-radius: 8px;
+          outline: none;
+        }
+
+        .typeahead {
+          background-color: #fff;
+        }
+
+        .typeahead:focus {
+          border: 2px solid #0097cf;
+        }
+
+        .tt-query {
+          -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+             -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+                  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        }
+
+        .tt-hint {
+          color: #999
+        }
+
+        .tt-menu {
+          width: 422px;
+          margin: 12px 0;
+          padding: 8px 0;
+          background-color: #fff;
+          border: 1px solid #ccc;
+          border: 1px solid rgba(0, 0, 0, 0.2);
+          -webkit-border-radius: 8px;
+             -moz-border-radius: 8px;
+                  border-radius: 8px;
+          -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+             -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+                  box-shadow: 0 5px 10px rgba(0,0,0,.2);
+        }
+
+        .tt-suggestion {
+          padding: 3px 20px;
+          font-size: 18px;
+          line-height: 24px;
+          color: #111;
+        }
+
+        .tt-suggestion:hover {
+          cursor: pointer;
+          color: #fff;
+          background-color: #0097cf;
+        }
+
+        .tt-suggestion.tt-cursor {
+          color: #fff;
+          background-color: #0097cf;
+        
+        }
+
+        .tt-suggestion p {
+          margin: 0;
+        }
     </style>
 {% endblock %}
 
@@ -633,5 +893,8 @@
     </div>
 
     <div id='status_detail_modal'>
+    </div>
+
+    <div id='todo_detail_modal'>
     </div>
 {% endblock %}

@@ -7,13 +7,15 @@ from django.utils.dateparse import parse_datetime
 # import HTTPResponse from django.http
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse 
 
-from .models import Project, Task, TaskTimer, ActiveTask
+from .models import Project, Task, TaskTimer, ActiveTask, Todo 
 
 from status.models import ProjectStatus, TaskStatus, NoteStatus
 
 from user.models import User
 
 from datetime import timedelta
+
+from django.views import View
 
 # Create your views here.
 
@@ -111,11 +113,7 @@ def create_project(request):
             else:
                 return HttpResponse('Project Existed')
 
-
-            return HttpResponse('Success')
-
     return HttpResponseBadRequest('Invalid method')
-
 
 
 def create_task(request):
@@ -129,9 +127,6 @@ def create_task(request):
             project_id = data.get('project_id', None)
             task_name = data.get('task_name', None)
 
-            print(project_id)
-            print(task_name)
-
             project = Project.objects.get(id=project_id)
 
             task, created = project.task_set.get_or_create(name=task_name, project=project)
@@ -140,9 +135,6 @@ def create_task(request):
                 return HttpResponse('Success')
             else:
                 return HttpResponse('Task Existed')
-
-
-            return HttpResponse('Success')
 
     return HttpResponseBadRequest('Invalid method')
 
@@ -354,3 +346,133 @@ def set_task_status(request):
             return HttpResponse('Success')
 
     return HttpResponseBadRequest('Invalid method')
+
+
+def process_ajax_request(request, method='POST'):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if is_ajax:
+        if request.method == method:
+            data = request.POST
+            return data
+
+    return HttpResponseBadRequest('Invalid method')
+
+def todo_detail(request):
+    data = process_ajax_request(request)
+
+    project_id = data.get('project_id', None)
+
+    if not project_id:
+        todos = Todo.objects.all()
+        tasks = Task.objects.all()
+    else:
+        todos = Todo.objects.filter(project__id=project_id)
+
+    context = {'todos': todos}
+    
+    return render(request, 'time_tracker/todo_detail.html', context)
+
+
+def create_todo(request):
+    data = process_ajax_request(request)
+
+    todo_name = data.get('todo_name', None)
+    task_id = data.get('task_id', None)
+    project_id = data.get('project_id', None)
+    priority = data.get('priority', 0)
+
+    if todo_name is None:
+        return HttpResponseBadRequest('Invalid todo name')
+
+    if project_id:
+        project = Project.objects.get(id=project_id)
+    else:
+        project = None
+    
+    if task_id:
+        task = Task.objects.get(id=task_id)
+    else:
+        task = None
+    
+    if project and task:
+        todo, created = Todo.objects.get_or_create(name=todo_name, project=project, task=task)
+    
+    elif project:
+        todo, created = Todo.objects.get_or_create(name=todo_name, project=project)
+
+    elif task:
+        todo, created = Todo.objects.get_or_create(name=todo_name, task=task, project=task.project)
+    
+    else:
+        todo, created = Todo.objects.get_or_create(name=todo_name, task=None, project=None)
+        print('created: ', created)
+
+
+    if created:
+        response = HttpResponse('Success')
+        todo.priority = priority
+    else:
+        response = HttpResponse('Todo Existed. PLease check again. Priority unchanged.')
+
+    todo.save()
+
+    return response
+
+    
+
+def delte_todo(request):
+    data = process_ajax_request(request)
+
+    todo_id = data.get('todo_id', None)
+
+    todo = Todo.objects.get(id=todo_id)
+
+    todo_name = todo.name
+    todo_id = todo.id
+
+    todo.delete()
+
+    return HttpResponse('TODO: {} ({}) deleted'.format(todo_name, todo_id))
+
+
+def update_todo(request):
+    data = process_ajax_request(request)
+
+    todo_id = data.get('todo_id', None)
+    is_done = data.get('is_done', None)
+
+    todo = Todo.objects.get(id=todo_id)
+
+    todo.is_done = is_done == 'true'
+
+    todo.save()
+
+    return HttpResponse('Success')
+
+
+def list_tasks(request):
+    data = process_ajax_request(request)
+
+    project_id = data.get('project_id', None)
+
+    if project_id:
+        tasks = Task.objects.filter(project__id=project_id)
+    else:
+        tasks = Task.objects.all()
+
+    task_list = []
+    for task in tasks:
+        task_list.append({'id': task.id, 'name': task.name})
+
+    print(task_list)
+    
+    return JsonResponse({'tasks': task_list})
+
+# https://stackoverflow.com/questions/32465052/using-typeahead-js-in-django-project
+class TaskView(View):
+    def get(self, request):
+        query = request.GET.get('query', '')
+        # data = Task.objects.filter(name__icontains=query).values('name')
+        tasks = Task.objects.all()
+        res = [{"value": task.id, "name": "{} - {}".format(task.name, task.project.name)} for task in tasks]
+        return JsonResponse(res, safe=False)
