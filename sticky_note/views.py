@@ -16,6 +16,9 @@ def view_notes(request):
 
             project_id = data.get('project_id', None)
 
+            if not project_id:
+                return render(request, 'sticky_note/note_view.html', {"has_project": False})
+
             project = Project.objects.get(id=project_id)
 
             if project is None:
@@ -23,7 +26,7 @@ def view_notes(request):
 
             notes = StickyNote.objects.filter(project=project)
 
-            context = {'notes': notes}
+            context = {'notes': notes, "has_project": True}
             return render(request, 'sticky_note/note_view.html', context)
         
 

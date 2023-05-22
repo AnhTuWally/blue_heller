@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %} {{title}} {{project.name}} {% endblock %}
 
+{% comment %} https://github.com/zurb/tribute tribute.js for mentioning task, project, todo {% endcomment %}
 {% block extra-js %}
     {% load static %}
     <script type="text/javascript" src="{% static 'js/index.js' %}"></script> 
@@ -543,7 +544,7 @@
                     remote: {
                         url: "{% url 'time_tracker:list_tasks' %}",
                         replace: function(url, query) {
-                            return url + "?query=" + query;
+                            return url + "?query=" + query + "&project_id=" + project_id;
                         }
                     }
                 });
@@ -556,6 +557,7 @@
                 },{
                     displayKey: 'name',
                     source: titlesDisplay.ttAdapter(),
+                    limit: 20
                 });
 
                 $('.typeahead').on('typeahead:selected', function(e, datum) {
@@ -847,6 +849,15 @@
         .tt-suggestion p {
           margin: 0;
         }
+
+        #todo-status-container{
+            display: flex;
+            flex-direction: row;
+        }
+
+        #timeline-container{
+            padding: 10px;
+        }
     </style>
 {% endblock %}
 
@@ -870,6 +881,11 @@
                 </div>
                 {% comment %} Project list {% endcomment %}
                 <div class="project-selection" style="width:250px;overflow:scroll;max-height:500px">
+                    <div class='project_container' style="display:flex" project_name='all'>
+                        <button class="open_project_button" project_id = ''>
+                            <strong class="mb-1">All</strong>
+                        </button>
+                    </div>
                     {% for project in project_list %}
                         <div class='project_container' style="display:flex" project_name={{project.name}}>
                             <button class="open_project_button" project_id = {{project.id}} >
@@ -892,9 +908,10 @@
     <div id='timeline-container' timeline_interval_id = ''>
     </div>
 
-    <div id='status_detail_modal'>
-    </div>
-
-    <div id='todo_detail_modal'>
+    <div id='todo-status-container'>
+        <div id='todo_detail_modal'>
+        </div>
+        <div id='status_detail_modal'>
+        </div>
     </div>
 {% endblock %}

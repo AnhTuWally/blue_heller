@@ -30,39 +30,41 @@
 
 
 <div style="display:flex;flex-direction:column">
-    <div class='card'>
-        <div class="card-header" >
-            Project Name : {{project.name}}
-        </div>
-        <div class="card-body" style="display:flex;flex-direction:column;justify-content:center">
+    {% if has_project %}
+        <div class='card'>
+            <div class="card-header" >
+                Project Name : {{project.name}}
+            </div>
+            <div class="card-body" style="display:flex;flex-direction:column;justify-content:center">
 
-            <div style="margin:10px;flex-grow:3;">
-                <label>Project Status</label>
-                <select name='project-status' id='project-status' style='min-width:50px;'>
-                    {% comment %} TODO: Might be able to optimize this part with some js or clever html trick {% endcomment %}
-                    {% if not project.status %} 
-                        <option value={{project_status.id}} selected='selected'></option>
-                    {% else %}
-                        <option value={{project_status.id}}></option>
-                    {% endif %}
-                    {% for project_status in project_statuses %}
-                        {% if project.status and project.status.id == project_status.id %}
-                            <option value={{project_status.id}} selected='selected'>{{project_status.name}}</option>
+                <div style="margin:10px;flex-grow:3;">
+                    <label>Project Status</label>
+                    <select name='project-status' id='project-status' style='min-width:50px;'>
+                        {% comment %} TODO: Might be able to optimize this part with some js or clever html trick {% endcomment %}
+                        {% if not project.status %} 
+                            <option value={{project_status.id}} selected='selected'></option>
                         {% else %}
-                            <option value={{project_status.id}}>{{project_status.name}}</option>
+                            <option value={{project_status.id}}></option>
                         {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div style="margin:10px;flex-grow:3;">
-                <input type="text" id="task_name" placeholder="start something" style="width:100%">
-            </div>
-            <div style="margin:10px;">
-                <button type="submit" class="btn btn-primary" id="create_task_button" >Create</button>
+                        {% for project_status in project_statuses %}
+                            {% if project.status and project.status.id == project_status.id %}
+                                <option value={{project_status.id}} selected='selected'>{{project_status.name}}</option>
+                            {% else %}
+                                <option value={{project_status.id}}>{{project_status.name}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="margin:10px;flex-grow:3;">
+                    <input type="text" id="task_name" placeholder="start something" style="width:100%">
+                </div>
+                <div style="margin:10px;">
+                    <button type="submit" class="btn btn-primary" id="create_task_button" >Create</button>
+                </div>
             </div>
         </div>
-    </div>
+    {% endif %}
 
     <div class='task-container'>
         {% if task_list %}

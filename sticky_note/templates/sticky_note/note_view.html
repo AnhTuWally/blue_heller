@@ -1,17 +1,19 @@
-<div class='card'>
-    <div clas='card-header'>
-        <input type="text" id="new_note_name" placeholder='note name'>
-    </div>
-    <div class='card-body'>
-        <div>
-            <textarea id="new_note_content" rows="4" cols="50"></textarea>
+{% if has_project %}
+    <div class='card'>
+        <div clas='card-header'>
+            <input type="text" id="new_note_name" placeholder='note name'>
         </div>
+        <div class='card-body'>
+            <div>
+                <textarea id="new_note_content" rows="4" cols="50"></textarea>
+            </div>
 
-        <div>
-            <button id="new_note_submit">Submit</button>
+            <div>
+                <button id="new_note_submit">Submit</button>
+            </div>
         </div>
     </div>
-</div>
+{% endif %}
 
 {% if notes %}
     {% for note in notes %}

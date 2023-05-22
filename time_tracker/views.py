@@ -37,6 +37,9 @@ def project_detail(request):
 
             project_id = data.get('project_id', None)
 
+            if not project_id:
+                return render(request, 'time_tracker/project_detail.html', {"has_project": False})
+
             project_statuses = ProjectStatus.objects.all()
             task_statuses = TaskStatus.objects.all()
             note_statuses = NoteStatus.objects.all()
@@ -51,7 +54,7 @@ def project_detail(request):
 
             context = {'project': project, "task_list": task_list, "active_tasks": active_tasks,
                        "project_statuses": project_statuses, "task_statuses": task_statuses,
-                       "note_statuses": note_statuses}
+                       "note_statuses": note_statuses, "has_project": True}
             return render(request, 'time_tracker/project_detail.html', context)
 
 
@@ -472,7 +475,15 @@ def list_tasks(request):
 class TaskView(View):
     def get(self, request):
         query = request.GET.get('query', '')
-        # data = Task.objects.filter(name__icontains=query).values('name')
-        tasks = Task.objects.all()
+        project_id = request.GET.get('project_id', None)
+
+        project_id = None if project_id == 'null' else project_id
+
+        if project_id:
+            tasks = Task.objects.filter(name__icontains=query, project__id=project_id)
+        else:
+            tasks = Task.objects.filter(name__icontains=query)
+
+        # tasks = Task.objects.all()
         res = [{"value": task.id, "name": "{} - {}".format(task.name, task.project.name)} for task in tasks]
         return JsonResponse(res, safe=False)
