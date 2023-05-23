@@ -24,4 +24,5 @@ urlpatterns = [
     path(r'delete_todo', views.delte_todo, name='delete_todo'),
     path(r'update_todo', views.update_todo, name='update_todo'),
     path(r'list_tasks', views.TaskView.as_view(), name='list_tasks'),
+    path(r'change_start_time', views.change_start_time, name='change_start_time'),
 ]

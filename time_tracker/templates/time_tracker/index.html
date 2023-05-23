@@ -666,6 +666,16 @@
                 load_notes(this);
             });
 
+            $('#show-hide-status-editor').click(function () {
+                current_display = $('#status_detail_modal').css('display')
+
+                if (current_display == 'none'){
+                    $('#status_detail_modal').css('display', 'block')
+                }else{
+                    $('#status_detail_modal').css('display', 'none')
+                }
+            });
+
             load_timeline('all');
 
             load_status('all')
@@ -911,7 +921,11 @@
     <div id='todo-status-container'>
         <div id='todo_detail_modal'>
         </div>
-        <div id='status_detail_modal'>
+
+        <div id='status-container'>
+            <button type="submit" class="btn btn-primary" id="show-hide-status-editor" style='padding:5px;'>Show/Hide Status Editor</button>
+            <div id='status_detail_modal' style="display:none">
+            </div>
         </div>
     </div>
 {% endblock %}

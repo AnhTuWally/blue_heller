@@ -168,6 +168,21 @@ def create_task_timer(request):
     return HttpResponseBadRequest('Invalid method')
 
 
+def change_start_time(request):
+    data = process_ajax_request(request)
+
+    active_task_id = data.get('active_task_id', None)
+    start_time = data.get('start_time', None)
+
+    if not start_time:
+        return HttpResponseBadRequest('Invalid start time')
+
+    task_timer = TaskTimer.objects.get(id=active_task_id)
+    task_timer.start_time = start_time
+
+    return HttpResponse('Success')
+
+
 def stop_task_timer(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if is_ajax:
