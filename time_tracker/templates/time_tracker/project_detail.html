@@ -124,7 +124,11 @@
                 </div>
 
                 <div>
-                    {{active_task.start_time}}
+                    <div class="start-time-display" active_task_id={{active_task.id}}>
+                        {{active_task.start_time| date:"Y-m-d H:i"}}
+                    </div>
+                    <button class="edit-start-time-button" active_task_id={{active_task.id}}>Edit</button>
+                    <button class="send-edit-start-time-button" active_task_id={{active_task.id}} style="display:none">Done</button>
                 </div>
                 
                 <div>

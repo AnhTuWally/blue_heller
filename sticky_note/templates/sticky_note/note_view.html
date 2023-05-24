@@ -4,8 +4,7 @@
             <input type="text" id="new_note_name" placeholder='note name'>
         </div>
         <div class='card-body'>
-            <div>
-                <textarea id="new_note_content" rows="4" cols="50"></textarea>
+            <div id="new_note_content" style='height:300px'>
             </div>
 
             <div>
@@ -23,7 +22,7 @@
             </div>
             <div class='card-body'>
                 <div>
-                    <textarea class="note_content" rows="4" cols="50">{{note.note}}</textarea>
+                    {{note.note | safe}}
                 </div>
 
                 <div>

@@ -76,6 +76,7 @@ function unbine_task_event(){
     $('.send_edit_timer_button').unbind();
     $('.delete_task_button').unbind();
     $('.view_task_button').unbind();
+    $('.edit-start-time-button').unbind();
 
     $('#project_status').unbind();
 
