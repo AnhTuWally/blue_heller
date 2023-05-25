@@ -104,17 +104,12 @@
             {% endfor %}
         {% endif %}
     </div>
-
-    <div id='task_detail_modal' task_id=''>
-    </div>
-
-
     <div class='active_task' style='border:solid 1px black;'>
         {% for active_task in active_tasks %}
             <div class='active_task_view'>
                 <div class='active_task_path'>
                     <div>
-                        <button class="open_project_button" project_id = {{active_task.project.id}} >
+                        <button class="open-project-button" project_id = {{active_task.project.id}} >
                             {{active_task.project.name}}
                         </button>
                     </div>
@@ -142,5 +137,10 @@
             </div>
         {% endfor %}
     </div>
+
+    <div id='task_detail_modal' task_id=''>
+    </div>
+
+
 
 </div>

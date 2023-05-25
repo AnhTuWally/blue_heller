@@ -24,13 +24,13 @@ function filter_project(){
 
     $("#project_name").unbind('keypress');
 
-    $('.project_container').each(function(){
+    $('.project-container').each(function(){
         if($(this).attr('project_name').includes(project_name)){
             $(this).show();
             project_counter++;
 
             if(project_counter == 1){
-                var project_open_button = $(this).find('.open_project_button');
+                var project_open_button = $(this).find('.open-project-button');
                 $("#project_name").keypress(function (e) {
                     if (e.which == 13) {
                         project_open_button.click();
@@ -59,13 +59,15 @@ function filter_project(){
 }
 
 function set_activated_project(project_id){
-    $('.open_project_button').removeClass('activated_project');
-    $('.open_project_button[project_id='+project_id+']').addClass('activated_project');
+    if(project_id != ''){
+        $('.open-project-button').removeClass('activated_project');
+        $('.open-project-button[project_id='+project_id+']').addClass('activated_project');
+    }
 }
 
 // TASK
 function unbine_task_event(){
-    $('.open_project_button').unbind();
+    $('.open-project-button').unbind();
 
     $("#create_task_button").unbind();
     $("#task_name").unbind();
@@ -86,11 +88,34 @@ function connect_task_event(){
     
     unbine_task_event();
 
-    $('.open_project_button').click(function () {
+    $('.open-project-button').click(function () {
         open_project(this);
         load_notes(this);
     });
     
+
+    $('.open-project-button').mousedown(function () {
+
+        const delete_button = $(this).siblings('.delete-project-button');
+        const timeout_id = setTimeout(function(){
+            delete_button.show()
+        }, 300);
+        console.log(timeout_id)
+
+        $(this).data("timeout_id", timeout_id)
+        
+    });
+
+    $('.open-project-button').mouseup(function () {
+        const timeout_id = $(this).data("timeout_id")
+        if (timeout_id != null){
+            clearTimeout(timeout_id);
+            const delete_button = $(this).siblings('.delete-project-button');
+            delete_button.hide();
+            $(this).removeData("timeout_id");
+        }
+    });
+
 
     $("#create_task_button").click(function () {
         console.log("Sending request to create task");

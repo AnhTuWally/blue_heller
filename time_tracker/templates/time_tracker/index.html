@@ -61,6 +61,10 @@
 
             if (element == null){
                 var project_id = $("#project_detail_modal").attr('project_id');
+                if (project_id == '' || project_id == null){
+                    console.log("No project id")
+                    return;
+                }
             } else {
                 var project_id = $(element).attr('project_id');
             }
@@ -496,6 +500,16 @@
         
         function load_timeline(project_id) {
 
+            if (project_id == null){
+                var project_id = $('#project_detail_modal').attr('project_id');
+            }
+
+            if (project_id == null | project_id == ''){
+                project_id = 'all'
+            }
+
+            console.log(`Loading timeline for project ${project_id}`);
+
             var data = {
                 'project_id': project_id,
             }
@@ -672,6 +686,16 @@
         }
 
 
+        function connect_project_long_press(element){
+
+            $(element).longpress(function(){
+                delete_button.css('display', 'block');
+            }, function(){
+                delete_button.css('display', 'none');
+            });
+        }
+
+
 
         $(document).ready(function() {
             $("#create_project_button").click(function () {
@@ -683,15 +707,38 @@
                 filter_project();
             });
 
-            $(".delete_project_button").click(function () {
+            $(".delete-project-button").click(function () {
                 console.log("Sending request to delete project");
                 delete_project(this);
             });
 
-            $('.open_project_button').click(function () {
+            $('.open-project-button').click(function () {
                 open_project(this);
                 load_notes(this);
             });
+
+
+            $('.open-project-button').mousedown(function () {
+
+                const delete_button = $(this).siblings('.delete-project-button');
+                const timeout_id = setTimeout(function(){
+                    delete_button.show()
+                }, 300);
+
+                $(this).data("timeout_id", timeout_id)
+
+            });
+
+            $('.open-project-button').mouseup(function () {
+                const timeout_id = $(this).data("timeout_id")
+                if (timeout_id != null){
+                    clearTimeout(timeout_id);
+                    const delete_button = $(this).siblings('.delete-project-button');
+                    delete_button.hide();
+                    $(this).removeData("timeout_id");
+                }
+            });
+            
 
             $('#show-hide-status-editor').click(function () {
                 current_display = $('#status_detail_modal').css('display')
@@ -718,17 +765,23 @@
 
 {% block extra-css %}
     <style>
-        .open_project_button{
-            width: 100%;
+        .open-project-button{
+            width: 100px;
+            height: 50px;
             background: #6393e0;
             color: #77DD77;
+            overflow: hidden;
         }
 
 
-        .open_project_button:hover{
-            width: 100%;
+        .open-project-button:hover{
+            width: auto;
+            height: auto;
+            min-width: 100px;
+            min-height: 50px;
             background: #693d70;
             color: #fff;
+            overflow: visible;
         }
 
         .activated_project{
@@ -754,10 +807,39 @@
         .big-container{
             display: flex;
         }
-
-        #project_container{
+        {% comment %} CSS PROJECT HERE {% endcomment %}
+        #project-menu-container{
             padding: 10px;
+            display: flex;
+            background: #3e4057;
+            border: 1px solid #410746;
+            margin: 10px;
         }
+
+        .project-selection{
+            display: flex;
+            flex-direction: row;
+            max-width:100%;
+            overflow: auto;
+        }
+
+        .project-container{
+            display: flex;
+            flex-direction: column;
+            margin: 10px;
+            padding: 10px;
+            background: #3e4057;
+            color: #fff;
+        }
+
+        .project-container:hover{
+            background: #77DD77;
+            color: #1a1a1a;
+        }
+
+        .delete-project-button{
+            display: none;
+        }   
 
         #project_detail_modal{
             padding: 10px;
@@ -887,11 +969,6 @@
           margin: 0;
         }
 
-        #todo-status-container{
-            display: flex;
-            flex-direction: row;
-        }
-
         #timeline-container{
             padding: 10px;
         }
@@ -899,60 +976,57 @@
 {% endblock %}
 
 {% block content %}
-    <div class='big-container'> 
-        <div id='project_container'>
-            <div class="user-selection" style="color: #fff">
-                <div class="current_user" user_id = {{ user.id }}>
-                    Howdy, {{ user.username }}!
-                </div>
-            </div>
-            <div class="text-primary" style="background-color:#bfbf69  ">
-                {% comment %} TEXT INPUT {% endcomment %}
-                <div style="display:flex;">
-                    <div style='padding:5px'>
-                        <input type="text" id="project_name" placeholder="start something">
-                    </div>
-                    <div >
-                        <button type="submit" class="btn btn-primary" id="create_project_button" style='padding:5px;display:none;'>New</button>
-                    </div>
-                </div>
-                {% comment %} Project list {% endcomment %}
-                <div class="project-selection" style="width:250px;overflow:scroll;max-height:500px">
-                    <div class='project_container' style="display:flex" project_name='all'>
-                        <button class="open_project_button" project_id = ''>
-                            <strong class="mb-1">All</strong>
-                        </button>
-                    </div>
-                    {% for project in project_list %}
-                        <div class='project_container' style="display:flex" project_name={{project.name}}>
-                            <button class="open_project_button" project_id = {{project.id}} >
-                                <strong class="mb-1">{{project.name}}</strong>
-                            </button>
-                            <button type="submit" class="btn btn-danger delete_project_button" project_id={{project.id}}>X</button>
-                        </div>
-                    {% endfor %}
-                </div>
+    <div class="user-selection" style="color: #fff">
+        <div class="current_user" user_id = {{ user.id }}>
+            Howdy, {{ user.username }}!
+        </div>
+    </div>
 
+    <div id='project-menu-container'>
+        {% comment %} TEXT INPUT {% endcomment %}
+        <div style="display:flex;">
+            <div style='padding:5px'>
+                <input type="text" id="project_name" placeholder="start something">
+            </div>
+            <div >
+                <button type="submit" class="btn btn-primary" id="create_project_button" style='padding:5px;display:none;'>New</button>
             </div>
         </div>
-        <div id="project_detail_modal" project_id=''>
-        </div>
-        <div id="sticky_note_modal" project_id=''>
-
+        
+        {% comment %} Project list {% endcomment %}
+        <div class="project-selection" >
+            <div class='project-container' project_name='all'>
+                <button class="open-project-button" project_id = ''>
+                    <strong class="mb-1">All</strong>
+                </button>
+            </div>
+            {% for project in project_list %}
+                <div class='project-container' project_name={{project.name}}>
+                    <button class="open-project-button" project_id = {{project.id}} >
+                        <strong class="mb-1">{{project.name}}</strong>
+                    </button>
+                    <button type="submit" class="btn btn-danger delete-project-button" project_id={{project.id}}>X</button>
+                </div>
+            {% endfor %}
         </div>
     </div>
 
     <div id='timeline-container' timeline_interval_id = ''>
     </div>
 
-    <div id='todo-status-container'>
+    <div class='big-container'> 
         <div id='todo_detail_modal'>
         </div>
+        <div id="project_detail_modal" project_id=''>
+        </div>
+        <div id="sticky_note_modal" project_id=''>
+        </div>
 
-        <div id='status-container'>
-            <button type="submit" class="btn btn-primary" id="show-hide-status-editor" style='padding:5px;'>Show/Hide Status Editor</button>
-            <div id='status_detail_modal' style="display:none">
-            </div>
+
+    </div>
+    <div id='status-container'>
+        <button type="submit" class="btn btn-primary" id="show-hide-status-editor" style='padding:5px;'>Show/Hide Status Editor</button>
+        <div id='status_detail_modal' style="display:none">
         </div>
     </div>
 {% endblock %}
