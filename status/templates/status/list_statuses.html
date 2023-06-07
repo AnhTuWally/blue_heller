@@ -81,38 +81,47 @@
                 'status_type': status_type,
             },
             success: function(response){
-                console.log(response);
-                console.log(`.project_status[status_id='${status_id}']`)
 
-                if(response.project_status){
-                    $(`.project_status[status_id='${status_id}'] span`).text('Created');
-                    $(`.project_status[status_id='${status_id}'] span`).addClass('badge-success');
-                    $(`.project_status[status_id='${status_id}'] span`).removeClass('badge-danger');
-                }else{
-                    $(`.project_status[status_id='${status_id}'] span`).text('Not Set');
-                    $(`.project_status[status_id='${status_id}'] span`).addClass('badge-danger');
-                    $(`.project_status[status_id='${status_id}'] span`).removeClass('badge-success');
+                if(response.success){
+                    status_id = response.status_id;
+                    status_enabled = response.status_enabled;
+
+                    status_type = response.status_type;
+                    status_enabled = response.status_enabled;
+
+                    if(status_type == 'project_status'){
+                        if(status_enabled){
+                            $(`.project-status[status_id='${status_id}'] span`).text('Created');
+                            $(`.project-status[status_id='${status_id}'] span`).addClass('badge-success');
+                            $(`.project-status[status_id='${status_id}'] span`).removeClass('badge-danger');
+                        } else {
+                            $(`.project-status[status_id='${status_id}'] span`).text('Not Set');
+                            $(`.project-status[status_id='${status_id}'] span`).addClass('badge-danger');
+                            $(`.project-status[status_id='${status_id}'] span`).removeClass('badge-success');
+                        }
+                    }else if(status_type == 'task_status'){
+                        if(status_enabled){
+                            $(`.task-status[status_id='${status_id}'] span`).addClass('badge-success');
+                            $(`.task-status[status_id='${status_id}'] span`).removeClass('badge-danger');
+                            $(`.task-status[status_id='${status_id}'] span`).html('Created');
+                        }else{
+                            $(`.task-status[status_id='${status_id}'] span`).addClass('badge-danger');
+                            $(`.task-status[status_id='${status_id}'] span`).removeClass('badge-success');
+                            $(`.task-status[status_id='${status_id}'] span`).html('Not Set');
+                        }
+                    }else if(status_type == 'note_status'){
+                        if(status_enabled){
+                            $(`.note-status[status_id='${status_id}'] span`).addClass('badge-success');
+                            $(`.note-status[status_id='${status_id}'] span`).removeClass('badge-danger');
+                            $(`.note-status[status_id='${status_id}'] span`).html('Created');
+                        }else{
+                            $(`.note-status[status_id='${status_id}'] span`).addClass('badge-danger');
+                            $(`.note-status[status_id='${status_id}'] span`).removeClass('badge-success');
+                            $(`.note-status[status_id='${status_id}'] span`).html('Not Set');
+                        }
+                    }
                 }
 
-                if(response.task_status){
-                    $(`.task_status[status_id='${status_id}'] span`).addClass('badge-success');
-                    $(`.task_status[status_id='${status_id}'] span`).removeClass('badge-danger');
-                    $(`.project_status[status_id='${status_id}'] span`).html('Created');
-                }else{
-                    $(`.task_status[status_id='${status_id}'] span`).addClass('badge-danger');
-                    $(`.task_status[status_id='${status_id}'] span`).removeClass('badge-success');
-                    $(`.project_status[status_id='${status_id}'] span`).html('Not Set');
-                }
-
-                if(response.note_status){
-                    $(`.note_status[status_id='${status_id}'] span`).addClass('badge-success');
-                    $(`.note_status[status_id='${status_id}'] span`).removeClass('badge-danger');
-                    $(`.project_status[status_id='${status_id}'] span`).html('Created');
-                }else{
-                    $(`.note_status[status_id='${status_id}'] span`).addClass('badge-danger');
-                    $(`.note_status[status_id='${status_id}'] span`).removeClass('badge-success');
-                    $(`.project_status[status_id='${status_id}'] span`).html('Not Set');
-                }
             },
             error: function(response){
                 console.log(response);
@@ -125,17 +134,17 @@
             create_status();
         });
 
-        $('.project_status').click(function(){
+        $('.project-status').click(function(){
             status_id = $(this).attr('status_id');
             toggle_status(status_id, 'project_status');
         });
 
-        $('.task_status').click(function(){
+        $('.task-status').click(function(){
             status_id = $(this).attr('status_id');
             toggle_status(status_id, 'task_status');
         });
 
-        $('.note_status').click(function(){
+        $('.note-status').click(function(){
             status_id = $(this).attr('status_id');
             toggle_status(status_id, 'note_status');
         });
@@ -179,7 +188,7 @@
                 <h3 class='card-title'>{{ master_status.name }}</h3>
             </div>
             <div class='card-body'>
-                <div class='project_status' status_id='{{master_status.id}}'>
+                <div class='project-status' status_id='{{master_status.id}}'>
                     Project Status:
                     {% if master_status.project_status %}
                         <span class='badge badge-success' >Created</span>
@@ -187,7 +196,7 @@
                         <span class='badge badge-danger'>Not Set</span>
                     {% endif %}
                 </div>
-                <div class='task_status' status_id='{{master_status.id}}'>
+                <div class='task-status' status_id='{{master_status.id}}'>
                     Task Status:
                     {% if master_status.task_status%}
                         <span class='badge badge-success'>Created</span>
@@ -195,7 +204,7 @@
                         <span class='badge badge-danger'>Not Set</span>
                     {% endif %}
                 </div>
-                <div class='note_status' status_id='{{master_status.id}}'>
+                <div class='note-status' status_id='{{master_status.id}}'>
                     Note Status:
                     {% if master_status.note_status%}
                         <span class='badge badge-success'>Created</span>

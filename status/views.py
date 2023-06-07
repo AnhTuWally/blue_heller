@@ -5,108 +5,142 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 
 from .models import MasterStatus
 
+from common.views import process_ajax_request
+
 
 def index(request):
-
+    # TODO: implement this page
     return HttpResponse("Hello, world. You're at the status index.")
 
-def create_stauts(request):
-    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-    if is_ajax:
-        if request.method == 'POST':
-            data = request.POST
+def create_status(request):
+    try:
+        data = process_ajax_request(request)
+    except ValueError as e:
+        return HttpResponseBadRequest(e)
+    
+    try:
+        status_name = data.get('status_name', None)
 
-            status_name = data.get('status_name', None)
-            status_description = data.get('status_description', None)
-            project_status = data.get('project_status', None)
-            task_status = data.get('task_status', None)
-            note_stauts = data.get('note_status', None)
+        # TODO: status_description is not being used
+        status_description = data.get('status_description', None)
 
-            # TODDO: need to handle description
-            status, created = MasterStatus.objects.get_or_create(name=status_name)
+        project_status = data.get('project_status', None)
+        task_status = data.get('task_status', None)
+        note_stauts = data.get('note_status', None)
 
-            if project_status == 'true':
-                Project_status_obj = status.create_project_status()
+        status, created = MasterStatus.objects.get_or_create(name=status_name)
 
-            if task_status == 'true':
-                task_status_obj = status.create_task_status()
-            
-            if note_stauts == 'true':
-                note_status_obj = status.create_note_status()
-            
-            status.save()
+        # Initialize the status objects
+        if project_status == 'true':
+            Project_status_obj = status.create_project_status()
 
-            return JsonResponse({'status_id': status.id})
+        if task_status == 'true':
+            task_status_obj = status.create_task_status()
+        
+        if note_stauts == 'true':
+            note_status_obj = status.create_note_status()
+        
+        status.save()
+        json_response = {'status_id': status.id, 'success': True,
+                         'project_status': project_status, 'task_status': task_status, 
+                         'note_status': note_stauts}
+    
+    except Exception as e:
+        json_response = {'error': str(e), 'success': False}
+        
 
-    return HttpResponseBadRequest('Invalid method')
+    return JsonResponse(json_response)
 
 
 def toggle_status(request):
-    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-    if is_ajax:
-        if request.method == 'POST':
-            data = request.POST
+    """Toggle the status of a status object
+
+    Args:
+        request (ajax): ajax request
+
+    Returns:
+        _type_: _description_
+    """
+    try:
+        data = process_ajax_request(request)
+    except ValueError as e:
+        return HttpResponseBadRequest(e)
+
+    try:
+        status_id = data.get('status_id', None)
+        status_type = data.get('status_type', None)
+        status = MasterStatus.objects.get(id=status_id)
 
 
-            status_id = data.get('status_id', None)
+        project_status_enabled = True if status.project_status else False
+        task_status_enabled = True if status.task_status else False
+        note_status_enabled = True if status.note_status else False
 
-            status_type = data.get('status_type', None)
+        # state = {'project_status': project_status_enabled,
+                #  'task_status': task_status_enabled,
+                #  'note_status': note_status_enabled}
 
-            
-            status = MasterStatus.objects.get(id=status_id)
+        if status_type == 'project_status':
+            status_enabled = project_status_enabled
+            if project_status_enabled:
+                status.project_status.delete()
+            else:
+                status.create_project_status()
+                status.save()
+        
+        elif status_type == 'task_status':
+            status_enabled = task_status_enabled
+            if task_status_enabled:
+                status.task_status.delete()
+            else:
+                status.create_task_status()
+                status.save()
 
-            state = {'project_status': False, 'task_status': False, 'note_status': False}
-            if status.project_status:
-                state['project_status'] = True
-            
-            if status.task_status:
-                state['task_status'] = True
+        elif status_type == 'note_status':
+            status_enabled = note_status_enabled
+            if note_status_enabled:
+                status.note_status.delete()
+            else:
+                status.create_note_status()
+                status.save()
 
-            if status.note_status:
-                state['note_status'] = True
+        else:
+            json_response = {'error': 'Invalid status type', 'success': False}
+            return JsonResponse(json_response)
 
-            if status_type == 'project_status':
-                if status.project_status:
-                    status.project_status.delete()
-                else:
-                    status.create_project_status()
-                    status.save()
-                state['project_status'] = not state['project_status'] 
-            
-            if status_type == 'task_status':
-                if status.task_status:
-                    status.task_status.delete()
-                else:
-                    status.create_task_status()
-                    status.save()
-                state['task_status'] = not state['task_status']
+        new_status = not status_enabled
+        json_response = {'status_id': status.id, 'success': True,
+                         'status_enabled': new_status, 'status_type': status_type} 
 
-            if status_type == 'note_status':
-                if status.note_status:
-                    status.note_status.delete()
-                else:
-                    status.create_note_status()
-                    status.save()
-                state['note_status'] = not state['note_status']
+    except Exception as e:
+        json_response = {'error': str(e), 'success': False}
 
+    return JsonResponse(json_response)
 
-            return JsonResponse(state)
-
-    return HttpResponseBadRequest('Invalid method')
 
 def status_detail(request):
-    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-    if is_ajax:
-        if request.method == 'POST':
-            data = request.POST
+    """ returns the status detail page
 
-            status_id = data.get('status_id', None)
-            
-            statuses = MasterStatus.objects.all()
+    Args:
+        request (ajax): ajax request
 
-            context = {'master_statuses': statuses}
+    Returns:
+        render: renders the status detail page
+    """
 
-            return render(request, 'status/list_statuses.html', context)
+    try:
+        data = process_ajax_request(request)
+    except ValueError as e:
+        return HttpResponseBadRequest(e)
+    
+    try:
+        status_id = data.get('status_id', None)
+        
+        statuses = MasterStatus.objects.all()
 
+        context = {'master_statuses': statuses}
 
-    return HttpResponseBadRequest('Invalid method')
+        return render(request, 'status/list_statuses.html', context)
+    except Exception as e:
+        return HttpResponseBadRequest(e)
+

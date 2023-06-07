@@ -1,0 +1,33 @@
+{% for active_task in active_tasks %}
+    <div class='active-task'>
+        <div class='active-task-path'>
+            <div>
+                <button class="open-project-button" project_id = {{active_task.project.id}} >
+                    {{active_task.project.name}}
+                </button>
+            </div>
+            <div>
+                <button class="view-task-button" task_id={{active_task.task.id}}>{{ active_task.task.name }}</button>
+            </div>
+        </div>
+        
+        <div class='active-task-time-display'>
+            <div>
+                <div class="start-time-display" active_task_id={{active_task.id}}>
+                    {{active_task.start_time| date:"Y-m-d H:i"}}
+                </div>
+                <button class="edit-start-time-button" active_task_id={{active_task.id}}>Edit</button>
+                <button class="send-edit-start-time-button" active_task_id={{active_task.id}} style="display:none">Done</button>
+            </div>
+
+            <div>
+                <time class="timer" start_time = {{ active_task.start_time.timestamp }}>0:00:00</time>
+            </div>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-danger stop-task-button" active_task_id={{active_task.id}}>Stop</button>
+        </div>
+
+    </div>
+{% endfor %}

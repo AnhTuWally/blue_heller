@@ -17,13 +17,18 @@ from datetime import timedelta
 
 from django.views import View
 
+
+# Import the process_ajax_request function from common.views
+from common.views import process_ajax_request
+
 # Create your views here.
 
 def index(request):
     project_list = Project.objects.all()
 
+    active_tasks = ActiveTask.objects.all()
 
-    context = {'project_list': project_list, 'title': 'Time Tracker - Project List'}
+    context = {'project_list': project_list, 'title': 'Time Tracker - Project List', 'active_tasks': active_tasks}
     
     return render(request, 'time_tracker/index.html', context) 
 
@@ -31,7 +36,6 @@ def project_detail(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if is_ajax:
         if request.method == 'POST':
-            # project_name = data['project_name']
 
             data = request.POST
 
@@ -49,10 +53,9 @@ def project_detail(request):
             if project is None:
                 return ""
 
-            active_tasks = ActiveTask.objects.all()
             task_list = project.task_set.all()
 
-            context = {'project': project, "task_list": task_list, "active_tasks": active_tasks,
+            context = {'project': project, "task_list": task_list, 
                        "project_statuses": project_statuses, "task_statuses": task_statuses,
                        "note_statuses": note_statuses, "has_project": True}
             return render(request, 'time_tracker/project_detail.html', context)
@@ -62,7 +65,6 @@ def task_detail(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if is_ajax:
         if request.method == 'POST':
-            # project_name = data['project_name']
 
             data = request.POST
 
@@ -84,7 +86,6 @@ def delete_task(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if is_ajax:
         if request.method == 'POST':
-            # project_name = data['project_name']
 
             data = request.POST
 
@@ -102,11 +103,10 @@ def create_project(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if is_ajax:
         if request.method == 'POST':
-            # project_name = data['project_name']
 
             data = request.POST
 
-            project_name = data.get('project_name', None)
+            project_name = data.get("project-name", None)
 
             project, created = Project.objects.get_or_create(name=project_name)
             project.save()
@@ -123,7 +123,6 @@ def create_task(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if is_ajax:
         if request.method == 'POST':
-            # project_name = data['project_name']
 
             data = request.POST
 
@@ -506,3 +505,14 @@ class TaskView(View):
         # tasks = Task.objects.all()
         res = [{"value": task.id, "name": "{} - {}".format(task.name, task.project.name)} for task in tasks]
         return JsonResponse(res, safe=False)
+
+
+def load_active_tasks(request):
+    data = process_ajax_request(request)
+
+    active_tasks = ActiveTask.objects.all()
+
+    context = {'active_tasks': active_tasks}
+    
+    return render(request, 'time_tracker/active_task_detail.html', context) 
+

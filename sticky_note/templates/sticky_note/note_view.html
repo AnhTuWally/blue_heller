@@ -1,32 +1,43 @@
+{% comment %} 
+This is a view that shows the notes to users
+This has two section 
+    1. the new note section
+    2. the notes that the user has created
+{% endcomment %}
+
+{% comment %} New Note section {% endcomment %}
 {% if has_project %}
     <div class='card'>
         <div clas='card-header'>
-            <input type="text" id="new_note_name" placeholder='note name'>
+            <input type="text" id="new-note-name" placeholder='title'>
         </div>
         <div class='card-body'>
-            <div id="new_note_content" style='height:300px'>
+            <div id="new-note-content" style='height:300px'>
+                {% comment %} The content will be replaced by js quill code {% endcomment %}
             </div>
 
             <div>
-                <button id="new_note_submit">Submit</button>
+                <button id="new-note-submit">Submit</button>
             </div>
         </div>
     </div>
 {% endif %}
 
+{% comment %} List all the notes {% endcomment %}
 {% if notes %}
     {% for note in notes %}
         <div class='card'>
             <div clas='card-header'>
-                <input type="text" class="note_name" note_id={{note.id}} placeholder={{note.name}}>
+                <input type="text" class="note-name" note_id={{note.id}} placeholder={{note.name}}>
             </div>
             <div class='card-body'>
+                {% comment %} The note is shown using html {% endcomment %}
                 <div>
                     {{note.note | safe}}
                 </div>
 
                 <div>
-                    <button class="delete_note" note_id={{note.id}}>Delete</button>
+                    <button class="delete-note btn-danger" note_id={{note.id}}>Delete</button>
                 </div>
             </div>
         </div>

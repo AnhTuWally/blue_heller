@@ -6,74 +6,107 @@ from .models import StickyNote
 
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse 
 
+# import process_ajax_request from common.views
+from common.views import process_ajax_request
+
 # Create your views here.
 
 def view_notes(request):
-    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-    if is_ajax:
-        if request.method == 'POST':
-            data = request.POST
+    """ Query the database for all notes and return them to the user
+    If the project_id is provided, only return notes for that project
 
-            project_id = data.get('project_id', None)
+    Args:
+        request (ajax): The ajax request
 
-            if not project_id:
-                return render(request, 'sticky_note/note_view.html', {"has_project": False})
+    Returns:
+        render: The rendered template with the notes
+    """
 
-            project = Project.objects.get(id=project_id)
+    # Get the data from the request
+    try:
+        data = process_ajax_request(request)
+    except ValueError as e:
+        return HttpResponseBadRequest(e)
 
-            if project is None:
-                return ""
+    # Get the project_id from the data 
+    project_id = data.get('project_id', None)
+    
+    # Get the project if the project_id is provided
+    project = Project.objects.get(id=project_id) if project_id else None
 
-            notes = StickyNote.objects.filter(project=project)
+    # If the project exists, get all notes for the project
+    if project:
+        # Get all notes for the project
+        notes = StickyNote.objects.filter(project=project)
+        has_project = True
+    else:
+        # Get all notes for all projects
+        notes = StickyNote.objects.filter()
+        has_project = False
 
-            context = {'notes': notes, "has_project": True}
-            return render(request, 'sticky_note/note_view.html', context)
-        
+    # Create the context for the template
+    context = {'notes': notes, "has_project": has_project}
+
+    return render(request, 'sticky_note/note_view.html', context)
 
 
 def create_note(request):
-    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-    if is_ajax:
-        if request.method == 'POST':
-            data = request.POST
+    """ A function to create a new note
 
-            project_id = data.get('project_id', None)
-            note_name = data.get('name', None)
-            content = data.get('content', None)
-            user_id = data.get('user_id', None)
+    Args:
+        request (ajax): The ajax post request to create the note
 
-            project = Project.objects.get(id=project_id)
-            user = User.objects.get(id=user_id)
+    Returns:
+        json: The json response with the note data
+    """
 
+    try:
+        data = process_ajax_request(request)
+    except ValueError as e:
+        return HttpResponseBadRequest(e)
 
-            note = StickyNote.objects.create(project=project, name=note_name, note=content, user=user)
+    try:
+        project_id = data.get('project_id', None)
+        note_name = data.get('name', None)
+        content = data.get('content', None)
+        user_id = data.get('user_id', None)
 
-            return HttpResponse('Success')
+        project = Project.objects.get(id=project_id)
+        user = User.objects.get(id=user_id)
+
+        note = StickyNote.objects.create(project=project, name=note_name, note=content, user=user)
+
+        response_data = {'note_id': note.id, 'note_name': note.name, 'note_content': note.note, 
+                         'user_id': note.user.id, 'user_name': note.user.name}
+    except Exception as e:
+        response_data = {'error': str(e), 'success': False}
+
+    return JsonResponse(response_data)
 
         
 def delete_note(request):
-    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-    if is_ajax:
-        if request.method == 'POST':
-            data = request.POST
+    """ A function to delete a note
 
-            note_id = data.get('note_id', None)
+    Args:
+        request (ajax): The ajax post request to delete the note
 
-            print('-'*100)
-            print(note_id)
-            print('-'*100)
+    Returns:
+        Json: The json response with the note data. success will be True if the note was deleted
+    """
 
-            note = StickyNote.objects.get(id=note_id)
+    try:
+        data = process_ajax_request(request)
+    except ValueError as e:
+        return HttpResponseBadRequest(e)
 
-            note.delete()
+    note_id = data.get('note_id', None)
 
-            return HttpResponse('Success')
+    try:
+        note = StickyNote.objects.get(id=note_id)
+        note.delete()
 
-        
-
-
-
-
-
-
-
+        response_data = {'note_id': note_id, 'success': True}
+    except StickyNote.DoesNotExist:
+        response_data = {'note_id': note_id, 'success': False}
+    
+    return JsonResponse(response_data)
