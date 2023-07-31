@@ -1,14 +1,22 @@
 <!-- templates/home.html-->
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Blue Heeler{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-  Hi {{ user.username }}!
-  <p><a href="{% url 'logout' %}">Log Out</a></p>
-{% else %}
-  <p>You are not logged in</p>
-  <a href="{% url 'login' %}">Log In</a>
-{% endif %}
+  {% if user.is_authenticated %}
+    {% comment %} 
+      If user is logged in -> re-direct to the time_tracker page 
+    {% endcomment %}
+    <script>
+      window.location.href = "{% url 'time_tracker:index' %}"
+    </script >
+  {% else %}
+    {% comment %} 
+      If user is NOT logged in -> re-direct to log in page
+    {% endcomment %}
+    <script>
+      window.location.href = "{% url 'user:login' %}"
+    </script>
+  {% endif %}
 {% endblock %}

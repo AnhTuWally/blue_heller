@@ -1,0 +1,115 @@
+[
+    {
+        "type": "Group",
+        "name": "sticky_note",
+        "parent_id": null,
+        "workspaceRoot": null,
+        "workspacePath": null,
+        "id": "4NX5ftLDWbCHVemv"
+    },
+    {
+        "type": "Directory",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/status/models",
+        "parent_id": "4NX5ftLDWbCHVemv",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "status/models",
+        "id": "XRAlzTDnO6eLjmg5",
+        "label": null
+    },
+    {
+        "type": "File",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/sticky_note/urls.py",
+        "parent_id": "4NX5ftLDWbCHVemv",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "sticky_note/urls.py",
+        "id": "QtIfgwlZ4VKUkJpa"
+    },
+    {
+        "type": "File",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/sticky_note/views.py",
+        "parent_id": "4NX5ftLDWbCHVemv",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "sticky_note/views.py",
+        "id": "BolRhxZ67KFdYD2a"
+    },
+    {
+        "type": "File",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/sticky_note/models.py",
+        "parent_id": "4NX5ftLDWbCHVemv",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "sticky_note/models.py",
+        "id": "ko842xYODTZByrEL"
+    },
+    {
+        "type": "Group",
+        "name": "time_tracker",
+        "parent_id": null,
+        "workspaceRoot": null,
+        "workspacePath": null,
+        "id": "zpaxK6BsyQVvHXem"
+    },
+    {
+        "type": "Group",
+        "name": "status",
+        "parent_id": null,
+        "workspaceRoot": null,
+        "workspacePath": null,
+        "id": "AI6vBoSPH193jl45"
+    },
+    {
+        "type": "File",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/sticky_note/templates/sticky_note/note_view.html",
+        "parent_id": "4NX5ftLDWbCHVemv",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "sticky_note/templates/sticky_note/note_view.html",
+        "id": "nFwoE1B36jl07yAN"
+    },
+    {
+        "type": "Directory",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/time_tracker/models",
+        "parent_id": "zpaxK6BsyQVvHXem",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "time_tracker/models",
+        "id": "JiCg4uZAMoWSBpQP"
+    },
+    {
+        "type": "File",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/time_tracker/apps.py",
+        "parent_id": "zpaxK6BsyQVvHXem",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "time_tracker/apps.py",
+        "id": "Y7kbpwSOqDxgKzu9"
+    },
+    {
+        "type": "File",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/time_tracker/urls.py",
+        "parent_id": "zpaxK6BsyQVvHXem",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "time_tracker/urls.py",
+        "id": "gnTFKAvuhr1lWcLN"
+    },
+    {
+        "type": "File",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/time_tracker/views.py",
+        "parent_id": "zpaxK6BsyQVvHXem",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "time_tracker/views.py",
+        "id": "EAykhFP5uIpaOZeq"
+    },
+    {
+        "type": "Directory",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/status/models",
+        "parent_id": "AI6vBoSPH193jl45",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "status/models",
+        "id": "tBOfGzaDmyx5ZwJK"
+    },
+    {
+        "type": "File",
+        "name": "/home/xander/project/blue_heeler/blue_heeler/status/views.py",
+        "parent_id": "AI6vBoSPH193jl45",
+        "workspaceRoot": "/home/xander/project/blue_heeler/blue_heeler",
+        "workspacePath": "status/views.py",
+        "id": "fvUxu9rjFI1q3yBY"
+    }
+]

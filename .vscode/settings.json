@@ -1,0 +1,17 @@
+{
+    "favorites.groups": [
+        "Default",
+        "Project",
+        "sticky_note",
+        "status"
+    ],
+    "favorites.currentGroup": "Default",
+    "favorites.resources": [
+        {
+            "filePath": "status/models",
+            "group": "status"
+        }
+    ],
+    "favorites.sortOrder": "DESC",
+    "favorites.sortDirection": "ASC"
+}

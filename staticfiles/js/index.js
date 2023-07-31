@@ -1,3 +1,11 @@
+/**
+ * A base function to send ajax get request
+ * @param {String} url the url to send the request
+ * @param {String} csrf_token the CSRF token
+ * @param {Dictionary} data the data to send
+ * @param {function} success_callback 
+ * @param {function} error_callback 
+ */
 function ajax_post_request(url, csrf_token, data, success_callback, error_callback) {
     $.ajax({
         type: "POST",

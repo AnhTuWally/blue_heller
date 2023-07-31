@@ -1,3 +1,5 @@
+<!-- time_tracker/templates/time_tracker/index.html-->
+
 {% extends 'base.html' %}
 {% block title %} {{title}} {{project.name}} {% endblock %}
 
@@ -1085,9 +1087,25 @@
 
 {% block content %}
     <div class="user-selection" style="color: #fff">
-        <div class="current_user" user_id = {{ user.id }}>
-            Howdy, {{ user.username }}!
-        </div>
+        {% comment %} 
+            If the user is authenticated
+                -> allow to access the content of time_tracker
+            
+            else
+                -> redirect the user to the login page
+        {% endcomment %}
+        {% if user.is_authenticated %}
+            <div class="current_user" user_id = {{ user.id }}>
+                Howdy, {{ user.username }}!
+            </div>
+            <div id="logout-button" style="color: #f00">
+                <a href="{% url 'user:logout' %}">Logout</a>
+            </div>
+        {% else %}
+            <script>
+              window.location.href = "{% url 'user:login' %}"
+            </script>
+        {% endif %}
     </div>
 
     <div id='project-menu-container'>

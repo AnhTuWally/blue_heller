@@ -1,18 +1,38 @@
-<html>
-    <header>
-        <style>
-            body{
-                color: green;
-            }
-        </style>
-    </header>
-    <body>
-        <form method="POST" novalidate>
+<!-- user/templates/user.html -->
+{% extends 'base.html' %}
+{% block title %} Blue Heeler - Login {% endblock %}
+
+{% block extra-css %}
+
+    {% load static %}
+    <style>
+        #login-container{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            {% comment %} Added to center vertically {% endcomment %}
+            height: 100vh; 
+            background-image: url("{% static 'imgs/blue_heeler_login.jpeg' %}");
+            background-position: center;
+            background-repeat: repeat-x;
+            background-size: auto;
+        }
+        #login-form{
+            padding: 50px 50px;
+            border-radius: 10px;
+            border: 10px solid green;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id='login-container'>
+        <form method="POST" novalidate id='login-form'>
             {% csrf_token %}
             <h2>Login</h2>
             {{form.as_p}}
             <input type="submit" value="Login" />
         </form>
-    </body>
-
-</html>
+    </div>
+{% endblock %}
