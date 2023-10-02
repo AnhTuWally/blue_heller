@@ -1,7 +1,7 @@
-<!-- time_tracker/templates/time_tracker/index.html-->
+<!-- time_tracker/templates/time_tracker/index.html -->
 
 {% extends 'base.html' %}
-{% block title %} {{title}} {{project.name}} {% endblock %}
+{% block title %} Time Tracker - {{title}} {% endblock %}
 
 {% comment %} https://github.com/zurb/tribute tribute.js for mentioning task, project, todo {% endcomment %}
 {% block extra-js %}
@@ -18,11 +18,12 @@
             }
 
             var data = {
-                "project-name": project_name,
+                "project_name": project_name,
             }
 
             const success_callback  = function(response){
                 $("#project-name").val("");
+                console.log(response);
                 location.reload();
             }
 
@@ -218,7 +219,7 @@
                 console.log(response);
             }
 
-            ajax_post_request("{% url 'time_tracker:create_task_timer' %}", 
+            ajax_post_request("{% url 'time_tracker:create_active_task' %}", 
                             "{{ csrf_token }}", data, success_callback, error_callback);
         }
 
@@ -261,7 +262,7 @@
                 console.log(response);
             }
 
-            ajax_post_request("{% url 'time_tracker:stop_task_timer' %}", 
+            ajax_post_request("{% url 'time_tracker:stop_active_task' %}", 
                             "{{ csrf_token }}", data, success_callback, error_callback);
         }
 
@@ -474,8 +475,8 @@
 
             const success_callback = function(response){
                 console.log('success');
-                $("#status_detail_modal").html(response);
-                $("#status_detail_modal").attr('status_id', status_id);
+                $("#status-detail-modal").html(response);
+                $("#status-detail-modal").attr('status_id', status_id);
             }
 
             const error_callback = function(response){
@@ -754,6 +755,30 @@
                 filter_project();
             });
 
+            {% comment %} TODO move this inside index.js {% endcomment %}
+            function show_project_list() {
+                {% comment %} modify the style of project-selection-container to be empty {% endcomment %}
+                $(".project-selection").css('display', 'flex');
+                $("#clear-project-search").css('display', 'block');
+            }
+
+            $("#project-name").on("focus", function () {
+                show_project_list();
+            });
+
+            function hide_project_list(){
+                $("#project-name").val("");
+                $(".project-selection").css('display', 'none');
+                $("#clear-project-search").css('display', 'none');
+                {% comment %} Reset the filter {% endcomment %}
+                filter_project();
+            }
+
+            $("#clear-project-search").on('click', function () {
+                hide_project_list();
+            });
+
+
             $(".delete-project-button").on('click', function () {
                 console.log("Sending request to delete project");
                 delete_project(this);
@@ -763,6 +788,7 @@
             $(document).on('click', '.open-project-button', function () {
                 open_project(this);
                 load_notes(this);
+                hide_project_list();
             });
 
             {% comment %} PLEASE TEST THIS {% endcomment %}
@@ -815,12 +841,12 @@
             
 
             $('#show-hide-status-editor').on('click', function () {
-                current_display = $('#status_detail_modal').css('display')
+                current_display = $('#status-detail-modal').css('display')
 
                 if (current_display == 'none'){
-                    $('#status_detail_modal').css('display', 'block')
+                    $('#status-detail-modal').css('display', 'block')
                 }else{
-                    $('#status_detail_modal').css('display', 'none')
+                    $('#status-detail-modal').css('display', 'none')
                 }
             });
 
@@ -849,6 +875,30 @@
 
 {% block extra-css %}
     <style>
+        {% comment %}
+        By defalt flex display have flex-direction to be  row (left -> right)
+
+        flex-direction note:
+            - horizontal row | left -> right
+            - vertical column | top -> bottom
+        {% endcomment %}
+
+        .main-menu{
+            display: flex;
+            margin: 10px;
+            padding: 10px;
+            background: #3e4057;
+            color: #fff;
+        }
+
+        .user-selection{
+            border: 1px solid #410746;
+            style: #fff;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
         .open-project-button{
             width: 100px;
             height: 50px;
@@ -866,6 +916,11 @@
             background: #693d70;
             color: #fff;
             overflow: visible;
+        }
+
+        #clear-project-search{
+            display: none;
+            border-radius: 50%;
         }
 
         .activated_project{
@@ -892,17 +947,19 @@
             display: flex;
         }
         {% comment %} CSS PROJECT HERE {% endcomment %}
-        #project-menu-container{
+        .project-menu-container{
             padding: 10px;
             display: flex;
             background: #3e4057;
             border: 1px solid #410746;
             margin: 10px;
+            border-radius: 10px;
         }
 
         .project-selection{
-            display: flex;
+            display: none;
             flex-direction: row;
+            flex-wrap: wrap;
             max-width:100%;
             overflow: auto;
         }
@@ -1086,55 +1143,60 @@
 {% endblock %}
 
 {% block content %}
-    <div class="user-selection" style="color: #fff">
-        {% comment %} 
-            If the user is authenticated
-                -> allow to access the content of time_tracker
-            
-            else
-                -> redirect the user to the login page
-        {% endcomment %}
-        {% if user.is_authenticated %}
-            <div class="current_user" user_id = {{ user.id }}>
-                Howdy, {{ user.username }}!
+    <div class="main-menu">
+        <div class="user-selection">
+            {% comment %} 
+                If the user is authenticated
+                    -> allow to access the content of time_tracker
+
+                else
+                    -> redirect the user to the login page
+            {% endcomment %}
+            {% if user.is_authenticated %}
+                <div class="current_user" user_id = {{ user.id }}>
+                    Howdy, {{ user.username }}!
+                </div>
+                <div id="logout-button" style="color: #f00">
+                    <a href="{% url 'user:logout' %}">Logout</a>
+                </div>
+            {% else %}
+                <script>
+                  window.location.href = "{% url 'user:login' %}"
+                </script>
+            {% endif %}
+        </div>
+
+        <div class='project-menu-container'>
+            {% comment %} TEXT INPUT {% endcomment %}
+            <div style="display:flex;">
+                <div style='padding:5px'>
+                    <input type="text" id="project-name" placeholder="start something">
+                </div>
+                <div>
+                    <button class="btn btn-danger" id="clear-project-search">X</button>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary" id="create-project-button" style='padding:5px;display:none;'>New</button>
+                </div>
             </div>
-            <div id="logout-button" style="color: #f00">
-                <a href="{% url 'user:logout' %}">Logout</a>
-            </div>
-        {% else %}
-            <script>
-              window.location.href = "{% url 'user:login' %}"
-            </script>
-        {% endif %}
+        </div>
     </div>
 
-    <div id='project-menu-container'>
-        {% comment %} TEXT INPUT {% endcomment %}
-        <div style="display:flex;">
-            <div style='padding:5px'>
-                <input type="text" id="project-name" placeholder="start something">
-            </div>
-            <div >
-                <button type="submit" class="btn btn-primary" id="create-project-button" style='padding:5px;display:none;'>New</button>
-            </div>
+    {% comment %} Project list {% endcomment %}
+    <div class="project-selection" >
+        <div class='project-container' project-name='all'>
+            <button class="open-project-button" project_id = ''>
+                <strong class="mb-1">All</strong>
+            </button>
         </div>
-        
-        {% comment %} Project list {% endcomment %}
-        <div class="project-selection" >
-            <div class='project-container' project-name='all'>
-                <button class="open-project-button" project_id = ''>
-                    <strong class="mb-1">All</strong>
+        {% for project in project_list %}
+            <div class='project-container' project-name='{{project.name}}'>
+                <button class="open-project-button" project_id = {{project.id}} >
+                    <strong class="mb-1">{{project.name}}</strong>
                 </button>
+                <button type="submit" class="btn btn-danger delete-project-button" project_id={{project.id}}>X</button>
             </div>
-            {% for project in project_list %}
-                <div class='project-container' project-name='{{project.name}}'>
-                    <button class="open-project-button" project_id = {{project.id}} >
-                        <strong class="mb-1">{{project.name}}</strong>
-                    </button>
-                    <button type="submit" class="btn btn-danger delete-project-button" project_id={{project.id}}>X</button>
-                </div>
-            {% endfor %}
-        </div>
+        {% endfor %}
     </div>
 
     <div>
@@ -1146,19 +1208,18 @@
         </div>
     </div>
 
+    <div id="project-detail-modal" project_id=''>
+    </div>
+
     <div class='big-container'> 
         <div id='todo-detail-modal'>
         </div>
-        <div id="project-detail-modal" project_id=''>
-        </div>
         <div id="sticky-note-modal" project_id=''>
         </div>
-
-
     </div>
     <div id='status-container'>
         <button type="submit" class="btn btn-primary" id="show-hide-status-editor" style='padding:5px;'>Show/Hide Status Editor</button>
-        <div id='status_detail_modal' style="display:none">
+        <div id='status-detail-modal' style="display:none">
         </div>
     </div>
 {% endblock %}

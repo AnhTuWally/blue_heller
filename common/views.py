@@ -1,5 +1,3 @@
-from django.http import HttpResponseBadRequest
-
 # Create your views here.
 def process_ajax_request(request, method='POST'):
     """
@@ -17,6 +15,14 @@ def process_ajax_request(request, method='POST'):
 
     # TODO: Add support for GET requests
 
+    Example:
+
+    The request is processed and a dictionary is retured        
+    >>> data = process_ajax_request(request)
+
+    The dictionary can be used to access the data 
+    >>> active_task_id = data.get('active_task_id', None)
+    >>> start_time = data.get('start_time', None)
     """
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if is_ajax:
