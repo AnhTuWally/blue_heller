@@ -58,9 +58,37 @@ def project_detail(request):
 
     project_id = data.get('project_id', None)
 
+    task_list = []
+
+    show_project_name_on_task = False
+
     # If there is no project id, return a defult page with no project
     if not project_id:
-        return render(request, 'time_tracker/project_detail.html', {"has_project": False})
+
+        show_project_name_on_task = True
+
+        # Query for the last 5 tasks that was tracked
+        # end hese task as task_list to the context
+        ordered_task_timers = TaskTimer.objects.all().order_by('-end_time')
+
+
+        # NOTE: this is very inefficient
+        # If the number of task timers is large, this will take a long time
+        for task_timer in ordered_task_timers:
+            if len(task_list) >= 5:
+                break
+
+            task = task_timer.task
+
+            if task not in task_list:
+                task_list.append(task)
+            
+
+        return render(request, 'time_tracker/project_detail.html',
+                      {"has_project": False,
+                       "task_list": task_list,
+                       "show_project_name_on_task": show_project_name_on_task,
+                       })
 
     # If there is a project id, get the project object  
     project = Project.objects.get(id=project_id)
@@ -76,6 +104,7 @@ def project_detail(request):
     task_list = project.task_set.all()
 
     context = {'project': project, "task_list": task_list, 
+                "show_project_name_on_task": show_project_name_on_task,
                 "project_statuses": project_statuses,
                 "task_statuses": task_statuses,
                 "has_project": True}

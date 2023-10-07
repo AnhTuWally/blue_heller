@@ -438,7 +438,7 @@
             }
 
             const success_callback = function(response){
-                console.log('success');
+                console.log('note-loaded');
                 $("#sticky-note-modal").html(response);
                 $("#sticky-note-modal").attr('project_id', project_id);
 
@@ -836,9 +836,6 @@
                 start_task(this);
             });
             
-            load_active_tasks();
-
-            
 
             $('#show-hide-status-editor').on('click', function () {
                 current_display = $('#status-detail-modal').css('display')
@@ -859,11 +856,17 @@
             });
 
 
+            load_active_tasks();
+
             load_timeline('all');
 
             load_status('all')
 
+            open_project('all');
+
             load_todo(null);
+
+            load_notes(null);
 
 
             console.log("ready");
@@ -987,6 +990,16 @@
         }
 
         #sticky-note-modal{
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        
+        .note-card{
+            background: #3e4057;
+            border: 1px solid #410746;
+            border-radius: 10px;
             padding: 10px;
         }
 

@@ -1,14 +1,20 @@
 <!-- time_tracker/templates/time_tracker/project_detail.html -->
 
 <style>
-    .task_action_container{
+    .task-action-container{
         style="display:flex;
         flex-direction:row;
         justify-content:center"
     }
 
-    .task_action_container button{
+    .task-action-container button{
         margin:5px;
+    }
+
+    .card-header{
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
     }
 
 </style>
@@ -57,8 +63,16 @@
         {% if task_list %}
             {% for task in task_list%}
                     <div class='card task-item'>
-                        <div class="card-header">
-                            <button class="view-task-button" task_id={{task.id}}>{{ task.name }}</button>
+                        <div class="card-header" style="display:flex;direction:column;">
+                            {% if show_project_name_on_task %}
+                                <div class="task-project-name">
+                                    <button class="open-project-button" project_id={{task.project.id}}>{{ task.project.name }}</button> 
+                                </div>
+                            {% endif %}
+
+                            <div class="task-name">
+                                <button class="view-task-button" task_id={{task.id}}>{{ task.name }}</button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div>
@@ -82,7 +96,7 @@
                             <div>
                                 Total Time : {{task.total_time_str}}
                             </div>
-                            <div class="task_action_container" >
+                            <div class="task-action-container" >
                                 <button type="submit" task_id="{{task.id}}" class="start-task-button">Start</button>
                                 <button type="submit" task_id="{{task.id}}" class="delete-task-button btn-danger">delete</button>
                             </div>

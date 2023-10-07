@@ -30,13 +30,12 @@ This is an app that provides the sticky notes to the system
 - [X] ~~*Review time_tracker/views.py*~~ [2023-10-02]
   - [X] ~~*Function comments*~~ [2023-10-02]
   - [X] ~~*Other comments and notes*~~ [2023-10-02]
-- [ ] Fix the display bug when "All" is selected as project
+- [X] ~~*Fix the display bug when "All" is selected as project*~~ [2023-10-07]
 - [ ] UI improvement
     - [ ] Integrate Priority Display
     - [ ] When timeline in clicked, do something
-    - [ ] Saved note styling 
+    - [X] ~~*Saved note styling*~~ [2023-10-07] 
 - [ ] Adding function to delete status 
-- [ ] Adding registration page
 
 
 2023/08/06
@@ -54,12 +53,21 @@ This is an app that provides the sticky notes to the system
   - [ ] project_detail function seem to have some query that can be optimized 
 
 2023/10/02
-- [ ] Investigate "Style sheet could not be loaded `static/scss/bootstrap.scss`
 - [ ] Idea: 
   - [ ] reviewable component such as audio reviewable with the ability to add notes
   - [ ] using eq as a way to zoom on the element that needed to be reviewed
 
 
+2023/10/07
+- [ ] Change the CODE ME in the title to the name of the currently active Project and Task
+- [ ] When a project is selected -> the url also change so that if the user restart they don't loose where they are and have to start from fresh
+- [ ] Test if it make more sense to have an add note button to focus user on an area to add note instead of having it kind of attach to the note section at the moment. 
+- [ ] Add the feature where user can edit old notes and the title should not be an input field =))
+
+
+LOW-PRIO TODO:
+- [ ] Adding registration page
+- [ ] Investigate "Style sheet could not be loaded `static/scss/bootstrap.scss`
 
 
 # Change Logo
