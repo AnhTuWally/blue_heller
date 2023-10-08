@@ -31,11 +31,11 @@ This is an app that provides the sticky notes to the system
   - [X] ~~*Function comments*~~ [2023-10-02]
   - [X] ~~*Other comments and notes*~~ [2023-10-02]
 - [X] ~~*Fix the display bug when "All" is selected as project*~~ [2023-10-07]
-- [ ] UI improvement
-    - [ ] Integrate Priority Display
-    - [ ] When timeline in clicked, do something
+- [X] ~~*UI improvement*~~ [2023-10-08]
+    - [X] ~~*Integrate Priority Display*~~ [2023-10-08]
+      - [X] ~~*Sort todo by priority*~~ [2023-10-08]
+      - NOTE -> currently we are doing this in a very non-dynamic way
     - [X] ~~*Saved note styling*~~ [2023-10-07] 
-- [ ] Adding function to delete status 
 
 
 2023/08/06
@@ -68,6 +68,8 @@ This is an app that provides the sticky notes to the system
 LOW-PRIO TODO:
 - [ ] Adding registration page
 - [ ] Investigate "Style sheet could not be loaded `static/scss/bootstrap.scss`
+- [ ] When timeline in clicked, do something
+- [ ] Adding function to delete status 
 
 
 # Change Logo

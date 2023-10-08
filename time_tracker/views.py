@@ -545,7 +545,9 @@ def todo_detail(request):
     else:
         todos = Todo.objects.filter(project__id=project_id)
 
-    context = {'todos': todos}
+    # NOTE: this is a very non-dynamic way of sorting -> there must be a different way 
+    sorted_todo = sorted(todos, key=lambda x: x.priority, reverse=True)
+    context = {'todos': sorted_todo}
     
     return render(request, 'time_tracker/todo_detail.html', context)
 
