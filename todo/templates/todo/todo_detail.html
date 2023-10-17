@@ -150,6 +150,46 @@
         }
     }
 
+    
+    function updateRepeatDaysLabels(){
+        {% comment %} Loop through the repeat-days class {% endcomment %}
+        $(".repeat-days").each((index, element) => {
+            {% comment %} Get the value inside each class {% endcomment %}
+            var repeat_days_labels = [];
+
+            var repeat_days = $(element).attr('value');
+            {% comment %} split repeats_days by ',' {% endcomment %}
+            splited_repeat_days = repeat_days.split(',');
+            {% comment %} loop through the splited_repeat_days {% endcomment %}
+            
+            for(var i=0; i<splited_repeat_days.length;i++){
+                int_day = splited_repeat_days[i];
+                if(int_day == '0'){
+                    repeat_days_labels.push('Mon');
+                }
+                if(int_day == '1'){
+                    repeat_days_labels.push('Tue');
+                }
+                if(int_day == '2'){
+                    repeat_days_labels.push('Wed');
+                }
+                if(int_day == '3'){
+                    repeat_days_labels.push('Thu');
+                }
+                if(int_day == '4'){
+                    repeat_days_labels.push('Fri');
+                }
+                if(int_day == '5'){
+                    repeat_days_labels.push('Sat');
+                }
+                if(int_day == '6'){
+                    repeat_days_labels.push('Sun');
+                }
+            }
+            $(element).text(repeat_days_labels.join(', '));
+        });
+    }
+
     $(document).ready(function (){
         $('.todo-priority').each(function(){
             var value = $(this).attr('value');
@@ -171,6 +211,8 @@
         $('#new-todo-repeat-type').change(function(){
             showHideWeeklyDateSelector();
         });
+
+        updateRepeatDaysLabels();
     });
 </script>
 
@@ -246,8 +288,8 @@
 </div>
 
 <div class="todos-container">
-    {% if todos %}
-        {% for todo in todos %}
+    {% if not_done_todos %}
+        {% for todo in not_done_todos %}
             <div class='todo-item'>
                 <div class="todo-info">
                     <div>
@@ -283,7 +325,54 @@
                         </div>
                         {% if todo.todo_repeat.repeat_days %}
                             <div>
-                                <label> on {{ todo.todo_repeat.repeat_days }} </label>
+                                <label class="repeat-days" value = {{ todo.todo_repeat.repeat_days }}></label>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if is_done_todos %}
+        {% for todo in is_done_todos %}
+            <div class='todo-item'>
+                <div class="todo-info">
+                    <div>
+                        <input type="checkbox" class="todo-checkbox" id="checkbox-{{ todo.id }}" value="is_done" todo_id={{ todo.id }} {% if todo.is_done %} checked {% endif %}>
+                        <label for="checkbox-{{ todo.id }}"> {{ todo.name }} </label> 
+                    </div>
+                    {% if todo.task %}
+                        <div>
+                            <label class="todo-parent">
+                                {{ todo.task.name }} | {{ todo.project.name }}
+                            </label>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <label class='todo-priority' value={{ todo.priority }}>
+                        {{ todo.priority  }} 
+                        </label>
+                    </div>
+                    <div>
+                        <button class="todo-delete btn-danger" todo_id={{ todo.id }}>x</button>
+                    </div>
+                </div>
+                <div class="todo-repeat">
+                    {% if todo.todo_repeat %}
+                        <div>
+                            <label> Repeat: </label>
+                        </div>
+                        <div>
+                            <label> {{ todo.todo_repeat.repeat_interval }} </label>
+                        </div>
+                        <div>
+                            <label> {{ todo.todo_repeat.repeat_type }} </label>
+                        </div>
+                        {% if todo.todo_repeat.repeat_days %}
+                            <div>
+                                <label class="repeat-days" value = {{ todo.todo_repeat.repeat_days }}></label>
                             </div>
                         {% endif %}
                     {% endif %}

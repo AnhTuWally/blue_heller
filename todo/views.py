@@ -39,10 +39,15 @@ def todo_detail(request):
         todos = Todo.objects.all()
     else:
         todos = Todo.objects.filter(project__id=project_id)
-
+    
     # NOTE: this is a very non-dynamic way of sorting -> there must be a different way 
     sorted_todo = sorted(todos, key=lambda x: x.priority, reverse=True)
-    context = {'todos': sorted_todo}
+
+    # split todo into is_done todo and not is_done todo
+    is_done_todos = todos.filter(is_done=True)
+    not_done_todos = todos.filter(is_done=False)
+
+    context = {'is_done_todos': is_done_todos, 'not_done_todos': not_done_todos}
     
     return render(request, 'todo/todo_detail.html', context)
 
@@ -170,7 +175,7 @@ def create_todo(request):
 
             # TODO: this might be better if the thet todo_repeat_pattern is a list of ints 
             # When it was first started as the ajax request, it was a list of strings
-            todo_repeat_pattern = [weekDayToInt(week_day) for week_day in todo_repeat_pattern]
+            todo_repeat_pattern = [str(weekDayToInt(week_day)) for week_day in todo_repeat_pattern]
             repeat_days = ','.join(todo_repeat_pattern) 
         else:
             repeat_days = None
