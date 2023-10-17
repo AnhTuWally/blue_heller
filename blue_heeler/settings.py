@@ -200,5 +200,5 @@ LOGGING = {
 }
 
 CRONJOBS = [
-    (0 0 * * *, 'todo.management.repeatableTodoUtils.checkRepeatableTodos')
+    ('0 0 * * *', 'todo.management.repeatableTodoUtils.checkRepeatableTodos')
 ]
