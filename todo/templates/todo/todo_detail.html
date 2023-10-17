@@ -1,0 +1,295 @@
+<!-- time_tracker/templates/time_tracker/todo_detail.html -->
+
+<style>
+    .todos-container{
+        display: flex;
+        flex-wrap: wrap;
+        margin: 10px;
+        border: 1px solid black;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .todo-item{
+        background: #3e4057;
+        color: #fff;
+        padding:10px;
+        margin:10px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: left;
+        align-items: left;
+        gap: 10px;
+        flex-direction: column;
+    }
+
+    .todo-info{
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        justify-content: left;
+        align-items: left;
+    }
+
+    .todo-repeat{
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        justify-content: left;
+        align-items: left;
+    }
+
+
+    .todo-parent{
+        color: #ff8aff;
+    }
+
+    .todo-priority{
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 12px;
+        padding: 10px;
+    }
+
+    #priority-container{
+        display: flex;
+        align-item: center;
+        gap: 10px;
+    }
+
+    .new-todo-attributes{
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #new-todo-repeat-attributes{
+        display: none;
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    #new-todo-repeat-interval{
+        width: 50px;
+    }
+
+    #new-todo-repeat-weekly{
+        display: none;
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    #todo-input-container{
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        padding:10px;
+    }
+
+    #create-todo{
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 12px;
+        padding: 10px;
+        background: rgb(0, 255, 46);
+    }
+
+</style>
+
+<script type="text/javascript"> 
+    function interpolate(start, end, steps, count) {
+        var delta = (end - start) / steps;
+        var final = start + delta * count;
+        return Math.floor(final);
+    }
+    // rgb(115,140,136) 
+    start_color = {
+        r: 115,
+        g: 140,
+        b: 136
+    }
+
+    // rgb(250,0,0)
+    end_color = {
+        r: 250,
+        g: 0,
+        b: 0
+    }
+
+    function getColor(value){
+        var r = interpolate(start_color.r, end_color.r, 100, value);
+        var g = interpolate(start_color.g, end_color.g, 100, value);
+        var b = interpolate(start_color.b, end_color.b, 100, value);
+        return "rgb(" + r + "," + g + "," + b + ")";
+    }
+
+    function showHideRepeatableAttributeEditor(){
+        var is_todo_repeatable = $('#is-new-todo-repeatable').is(':checked');
+        if(is_todo_repeatable){
+            $('#new-todo-repeat-attributes').css('display', 'flex');
+        }else{
+            $('#new-todo-repeat-attributes').css('display', 'none');
+        }
+    }
+
+    function showHideWeeklyDateSelector(){
+        var is_weekly_selected = $('#new-todo-repeat-type').val() == 'weekly';
+
+        if(is_weekly_selected){
+            $('#new-todo-repeat-weekly').css('display', 'flex');
+        }else{
+            $('#new-todo-repeat-weekly').css('display', 'none');
+        }
+    }
+
+    $(document).ready(function (){
+        $('.todo-priority').each(function(){
+            var value = $(this).attr('value');
+            $(this).css('background-color', getColor(value));
+        })
+
+        $('#todo-priority-value').change(function(){
+            var value = $(this).val();
+            var todo_priority = $('#priority-container').find('.todo-priority');
+            todo_priority.css('background-color', getColor(value));
+            todo_priority.attr('value', value);
+            todo_priority.text(value);
+        });
+
+        $('#is-new-todo-repeatable').change(function(){
+            showHideRepeatableAttributeEditor();
+        });
+
+        $('#new-todo-repeat-type').change(function(){
+            showHideWeeklyDateSelector();
+        });
+    });
+</script>
+
+<div class='card'>
+    <div clas='card-header' style='text-align: center; padding:10px;'>
+        Todo
+    </div>
+    <div class='card-body'>
+        <div id='todo-input-container'>
+            <div>
+                <input type="text" id="new-todo-name" placeholder='Tudo: '>
+            </div>
+            <div>
+                <button id="create-todo">+</button>
+            </div>
+        </div>
+        <div class='new-todo-attributes'>
+            <div id="priority-container">
+                <div>
+                    <input id="todo-priority-value" type="range" min="0" max="100" value="50" class="slider">
+                </div>
+                <div>
+                    <label class='todo-priority' value="50">
+                    50 
+                    </label>
+                </div>
+            </div>   
+
+            {% comment %}  the-basis??? {% endcomment %}
+            <div id="the-basics">
+                <input class="typeahead" id='task_name_input' type="text" placeholder="Task Name">
+                <input id='hidden_task_id' type="hidden" value=''>
+            </div>
+            
+            <div id="is-new-todo-repeatable-checkbox">
+                <input type="checkbox" id="is-new-todo-repeatable" value="is-new-todo-repeatable">
+                <label for="is-new-todo-repeatable"> Repeatable </label>
+            </div>
+
+            <div id="new-todo-repeat-attributes">
+                
+                Repeat Every:
+                {% comment %} spin box  {% endcomment %}
+                <input type="number" id="new-todo-repeat-interval" min="1" max="100" value="1">
+                <select id="new-todo-repeat-type">
+                    <option value="daily">Day</option>
+                    <option value="weekly">Week</option>
+                    <option value="monthly">Month</option>
+                </select>
+            </div>
+
+            {% comment %} TODO make input field for repeat weekly to choose the day using checkbox {% endcomment %}
+            <div id="new-todo-repeat-weekly">
+                <input type="checkbox" id="new-todo-repeat-weekly-sunday" value="sun">
+                <label for="new-todo-repeat-weekly-sunday"> Sunday </label>
+                <input type="checkbox" id="new-todo-repeat-weekly-monday" value="mon">
+                <label for="new-todo-repeat-weekly-monday"> Monday </label>
+                <input type="checkbox" id="new-todo-repeat-weekly-tuesday" value="tue">
+                <label for="new-todo-repeat-weekly-tuesday"> Tuesday </label>
+                <input type="checkbox" id="new-todo-repeat-weekly-wednesday" value="wed">
+                <label for="new-todo-repeat-weekly-wednesday"> Wednesday </label>
+                <input type="checkbox" id="new-todo-repeat-weekly-thursday" value="thu">
+                <label for="new-todo-repeat-weekly-thursday"> Thursday </label>
+                <input type="checkbox" id="new-todo-repeat-weekly-friday" value="fri">
+                <label for="new-todo-repeat-weekly-friday"> Friday </label>
+                <input type="checkbox" id="new-todo-repeat-weekly-saturday" value="sat">
+                <label for="new-todo-repeat-weekly-saturday"> Saturday </label>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="todos-container">
+    {% if todos %}
+        {% for todo in todos %}
+            <div class='todo-item'>
+                <div class="todo-info">
+                    <div>
+                        <input type="checkbox" class="todo-checkbox" id="checkbox-{{ todo.id }}" value="is_done" todo_id={{ todo.id }} {% if todo.is_done %} checked {% endif %}>
+                        <label for="checkbox-{{ todo.id }}"> {{ todo.name }} </label> 
+                    </div>
+                    {% if todo.task %}
+                        <div>
+                            <label class="todo-parent">
+                                {{ todo.task.name }} | {{ todo.project.name }}
+                            </label>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <label class='todo-priority' value={{ todo.priority }}>
+                        {{ todo.priority  }} 
+                        </label>
+                    </div>
+                    <div>
+                        <button class="todo-delete btn-danger" todo_id={{ todo.id }}>x</button>
+                    </div>
+                </div>
+                <div class="todo-repeat">
+                    {% if todo.todo_repeat %}
+                        <div>
+                            <label> Repeat: </label>
+                        </div>
+                        <div>
+                            <label> {{ todo.todo_repeat.repeat_interval }} </label>
+                        </div>
+                        <div>
+                            <label> {{ todo.todo_repeat.repeat_type }} </label>
+                        </div>
+                        {% if todo.todo_repeat.repeat_days %}
+                            <div>
+                                <label> on {{ todo.todo_repeat.repeat_days }} </label>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>

@@ -26,4 +26,5 @@ urlpatterns = [
     path('sticky_note/', include('sticky_note.urls')),
     path('status/', include('status.urls')),
     path('user/', include('user.urls')),
+    path('todo/', include('todo.urls')),
 ]

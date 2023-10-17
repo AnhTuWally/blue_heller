@@ -540,7 +540,7 @@
                 console.log(response);
             }
 
-            ajax_post_request("{% url 'time_tracker:update_todo' %}", 
+            ajax_post_request("{% url 'todo:update_todo' %}", 
                             "{{ csrf_token }}", data, success_callback, error_callback);
         }
 
@@ -604,19 +604,33 @@
                 console.log(response);
             }
 
-            ajax_post_request("{% url 'time_tracker:todo_detail' %}", 
+            ajax_post_request("{% url 'todo:todo_detail' %}", 
                             "{{ csrf_token }}", data, success_callback, error_callback);
         }
 
 
         function create_todo(){
-            todo_name = $('#new_todo_name').val().trim(); 
+            todo_name = $('#new-todo-name').val().trim(); 
             priority_value = $('#todo-priority-value').val();
             todo_task_id = $('#hidden_task_id').val();
 
+            is_todo_repeatable = $('#is-new-todo-repeatable').is(':checked');
+
+            todo_repeat_interval = $('#new-todo-repeat-interval').val();
+
+            todo_repeat_type = $('#new-todo-repeat-type').val();
+
+            start_date = new Date();
+            start_date_timestamp = Math.floor(Date.now() / 1000);
+            
+            // Iterate through the div with the id new-todo-repeat-weekly and 
+            // Get all the checkbox values into an array
+            var todo_repeat_pattern = [];
+            $('#new-todo-repeat-weekly input:checked').each(function() {
+                todo_repeat_pattern.push($(this).attr('value'));
+            });
 
             var project_id = $('#project-detail-modal').attr('project_id');
-
 
             if(project_id == ''){
                 project_id = null;
@@ -629,8 +643,17 @@
             data = {"todo_name": todo_name, 
                     "priority": priority_value, 
                     "task_id": todo_task_id,
-                    "project_id": project_id}
+                    "project_id": project_id,
+                    "is_todo_repeatable": is_todo_repeatable,
+                    "todo_repeat_interval": todo_repeat_interval,
+                    "todo_repeat_type": todo_repeat_type,
+                    "todo_repeat_pattern": todo_repeat_pattern,
+                    "start_date_timestamp": start_date_timestamp,
+                }
             
+            console.log(todo_repeat_pattern)
+            
+
             const success_callback = function(response){
                 console.log('todo_created');
 
@@ -644,7 +667,7 @@
 
             console.log("creating todo");
 
-            ajax_post_request("{% url 'time_tracker:create_todo' %}", 
+            ajax_post_request("{% url 'todo:create_todo' %}", 
                             "{{ csrf_token }}", data, success_callback, error_callback);
 
         }
@@ -673,7 +696,7 @@
                 console.log(response);
             }
 
-            ajax_post_request("{% url 'time_tracker:delete_todo' %}", 
+            ajax_post_request("{% url 'todo:delete_todo' %}", 
                             "{{ csrf_token }}", data, success_callback, error_callback);
         }
 

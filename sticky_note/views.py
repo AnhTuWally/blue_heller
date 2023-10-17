@@ -4,7 +4,7 @@ from time_tracker.models import Project
 from user.models import User
 from .models import StickyNote
 
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse 
+from django.http import HttpResponseBadRequest, JsonResponse 
 
 # import process_ajax_request from common.views
 from common.views import process_ajax_request

@@ -1,3 +1,16 @@
+# crontab jobs 
+
+## Resetings Repeatable Todo:
+
+python manage.py checkRepeatableTodos
+
+using djang-cron for now but APScheduler might be an alternative?
+run at mid-night every day
+0 0 * * * python manage.py checkRepeatableTodos
+
+python manage.py crontab add
+python manage.py crontab show
+
 
 For json responses:
 - 'success': true if the request is a success
@@ -39,7 +52,11 @@ This is an app that provides the sticky notes to the system
 
 
 2023/08/06
-- [ ] Adding a logging system for the python code
+- [X] ~~*Adding a logging system for the python code*~~ [2023-10-10]
+  - NOTE: there are two handlers
+    - Console handler print out the simple version of the log
+    - File handler print out the verboose version of the log
+      - By default the file handler is saved to .logs / debug.log
 - [ ] Add Eisenhower Matrix to UI/webview
 - [ ] Add the task_timer's note to the UI/webview
 - [ ] Add the Project and Task description to the UI/webview
@@ -66,10 +83,12 @@ This is an app that provides the sticky notes to the system
 
 
 LOW-PRIO TODO:
+- [ ] DEBUG -> whenever the timer stop the timeline does not stop
 - [ ] Adding registration page
 - [ ] Investigate "Style sheet could not be loaded `static/scss/bootstrap.scss`
 - [ ] When timeline in clicked, do something
 - [ ] Adding function to delete status 
+- [ ] Adding more logging statement into python functions
 
 
 # Change Logo

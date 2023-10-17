@@ -46,6 +46,22 @@
 
     {% endif %}
 
+    {% if todo_histories %}
+        {% for todo_history in todo_histories %}
+            var item = {
+                id: "{{ todo_history.id }}",
+                content: '{{ todo_history.todo.name }}',
+                start: '{{ todo_history.timestamp.isoformat }}',
+                group: '{{ todo_history.todo.name }}',
+                style: 'background-color: #0f9d58; color:#000',
+                subgroup: '{{ todo_history.todo.id }}'
+            };
+            items.add(item);
+        {% endfor %}
+    {% endif %}
+
+
+
     var options = {'showCurrentTime': true,
     'start': start_time,
     'end': end_time,

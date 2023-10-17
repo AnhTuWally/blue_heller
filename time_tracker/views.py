@@ -7,9 +7,9 @@ from django.utils.dateparse import parse_datetime
 # import HTTPResponse from django.http
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse 
 
-from .models import Project, Task, TaskTimer, ActiveTask, Todo 
+from .models import Project, Task, TaskTimer, ActiveTask
 
-from status.models import ProjectStatus, TaskStatus, NoteStatus
+from status.models import ProjectStatus, TaskStatus
 
 from user.models import User
 
@@ -17,11 +17,16 @@ from datetime import timedelta
 
 from django.views import View
 
+from todo.models import TodoHistory
+
 
 # Import the process_ajax_request function from common.views
 from common.views import process_ajax_request
 
 # Create your views here.
+
+import logging
+logger = logging.getLogger(__name__)
 
 def index(request):
     """
@@ -125,12 +130,12 @@ def create_project(request):
     data = process_ajax_request(request)
     project_name = data.get('project_name', None)
 
-    print("Creating project with name: {}".format(project_name))
 
     project, created = Project.objects.get_or_create(name=project_name)
     project.save()
 
     if created:
+        logger.info("New Project Created: {}".format(project_name))
         return HttpResponse('New Project: "{}" Created.'.format(project_name))
     else:
         return HttpResponse('{} Existed.'.format(project_name))
@@ -154,6 +159,8 @@ def delete_project(request):
     project = Project.objects.get(id=project_id)
 
     project.delete()
+
+    logger.warning("Project Deleted: {}".format(project.name))
 
     return HttpResponse('Success')
 
@@ -182,6 +189,9 @@ def set_project_status(request):
     status = ProjectStatus.objects.get(id=project_status_id)
 
     project.status = status
+
+    logger.debug("Project Status Changed: {} -> {}".format(project.name, status.name))
+
     project.save()
 
     return HttpResponse('Success')
@@ -230,6 +240,7 @@ def create_task(request):
     task, created = project.task_set.get_or_create(name=task_name, project=project)
 
     if created:
+        logger.debug("New Task Created: {}".format(task_name))
         return HttpResponse('Success')
     else:
         return HttpResponse('Task Existed')
@@ -252,6 +263,8 @@ def delete_task(request):
     task = Task.objects.get(id=task_id)
 
     task.delete()
+
+    logger.warning("Task Deleted: {}".format(task.name))
 
     return HttpResponse('Success')
 
@@ -281,6 +294,9 @@ def set_task_status(request):
     status = TaskStatus.objects.get(id=task_status_id)
 
     task.status = status
+
+    logger.debug("Task Status Changed: {} -> {}".format(task.name, status.name))
+
     task.save()
 
     return HttpResponse('Success')
@@ -349,6 +365,7 @@ def create_active_task(request):
     if created:
         active_task.start_time = timezone.now()
         active_task.save()
+        logger.debug("New Active Task Created: {}".format(active_task.name))
 
     return JsonResponse({'active_task_id': active_task.id})
 
@@ -385,15 +402,19 @@ def stop_active_task(request):
     # -> Delete ActiveTask from the db
     active_task.delete()
 
-    task_timer.end_time = timezone.now()
-    task_timer.duration = task_timer.end_time - task_timer.start_time
-    task_timer.save()
-
+    end_time = timezone.now()
+    duration = end_time - task_timer.start_time
 
     # If the duration is less than 1 second -> delete
-    if task_timer.duration < timedelta(seconds=1):
-        task_timer.delete()
-        return HttpResponse('Task timer duration is less than 1 second. Deleting')
+    if duration < timedelta(seconds=1):
+        logger.debug(f"Task timer duration is less than 1 second. No Task Timer was created for {active_task}.")
+        return HttpResponse(f'Task timer duration is less than 1 second. No new task timer was created for {active_task}.')
+
+    task_timer.end_time = end_time 
+    task_timer.duration = duration
+    task_timer.save()
+
+    logger.debug(f"ActiveTask {active_task} deleted -> TaskTimer {task_timer} created")
 
     return HttpResponse('Success')
 
@@ -417,10 +438,12 @@ def change_start_time(request):
     if not start_time:
         return HttpResponseBadRequest('Invalid start time')
 
-    task_timer = ActiveTask.objects.get(id=active_task_id)
-    task_timer.start_time = start_time
+    active_task = ActiveTask.objects.get(id=active_task_id)
+    active_task .start_time = start_time
 
-    task_timer.save()
+    logger.debug("ActiveTask {} start time changed to {}".format(active_task, start_time))
+
+    active_task.save()
 
     return HttpResponse('Success')
 
@@ -445,6 +468,8 @@ def delete_task_timer(request):
     task_timer = TaskTimer.objects.get(id=task_timer_id)
 
     task_timer.delete()
+
+    logger.debug("TaskTimer {} deleted".format(task_timer))
 
     return HttpResponse('Success')
 
@@ -487,6 +512,8 @@ def edit_task_timer(request):
 
     task_timer.save()
 
+    logger.debug("TaskTimer {} edit saved.")
+
     return JsonResponse({'task_timer_id': task_timer_id, 
                         'start_time': start_time,
                         'end_time': end_time,
@@ -519,147 +546,16 @@ def timeline(request):
         task_timers = TaskTimer.objects.all()
     else:
         task_timers = TaskTimer.objects.filter(project__id=project_id)
-
+    
     context['task_timers'] = task_timers if task_timers else False
+    
+    # filter the todo histories that have modified_field value of is_done and the new_value to be True
+    todo_histories = TodoHistory.objects.filter(modified_field='is_done', new_value=True)
+    context['todo_histories'] = todo_histories
     
     return render(request, 'time_tracker/timeline.html', context) 
 
 
-# TODO
-def todo_detail(request):
-    """ Render the todo view given a project_id
-    if the project id is not give, get all the notes
-
-    Args:
-        request (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    data = process_ajax_request(request)
-
-    project_id = data.get('project_id', None)
-
-    if not project_id:
-        todos = Todo.objects.all()
-    else:
-        todos = Todo.objects.filter(project__id=project_id)
-
-    # NOTE: this is a very non-dynamic way of sorting -> there must be a different way 
-    sorted_todo = sorted(todos, key=lambda x: x.priority, reverse=True)
-    context = {'todos': sorted_todo}
-    
-    return render(request, 'time_tracker/todo_detail.html', context)
-
-
-def create_todo(request):
-    """Create the todo given 
-    - todo_name
-    - task_id
-    - project_id
-    - priority
-
-    Args:
-        request (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    data = process_ajax_request(request)
-
-    todo_name = data.get('todo_name', None)
-    task_id = data.get('task_id', None)
-    project_id = data.get('project_id', None)
-    priority = data.get('priority', 0)
-
-    if todo_name is None:
-        return HttpResponseBadRequest('Invalid todo name')
-
-    if project_id:
-        project = Project.objects.get(id=project_id)
-    else:
-        project = None
-    
-    if task_id:
-        task = Task.objects.get(id=task_id)
-    else:
-        task = None
-    
-    if project and task:
-        todo, created = Todo.objects.get_or_create(name=todo_name,
-                                                   project=project,
-                                                   task=task)
-    
-    elif project:
-        todo, created = Todo.objects.get_or_create(name=todo_name,
-                                                   project=project)
-
-    elif task:
-        todo, created = Todo.objects.get_or_create(name=todo_name,
-                                                   task=task,
-                                                   project=task.project)
-    
-    else:
-        todo, created = Todo.objects.get_or_create(name=todo_name,
-                                                   task=None,
-                                                   project=None)
-
-    if created:
-        response = HttpResponse('Success')
-        todo.priority = priority
-    else:
-        response = HttpResponse('Todo Existed. PLease check again. Priority unchanged.')
-
-    todo.save()
-    return response
-
-
-def delte_todo(request):
-    """Delete a todo given the todo_id
-
-    Args:
-        request (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    data = process_ajax_request(request)
-
-    todo_id = data.get('todo_id', None)
-
-    todo = Todo.objects.get(id=todo_id)
-
-    todo_name = todo.name
-    todo_id = todo.id
-
-    todo.delete()
-
-    return HttpResponse('TODO: {} ({}) deleted'.format(todo_name, todo_id))
-
-
-def update_todo(request):
-    """update the todo given the todo_id and is_done
-
-    this is to update the db of whether the todo is done or not
-
-    Args:
-        request (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    data = process_ajax_request(request)
-
-    todo_id = data.get('todo_id', None)
-    is_done = data.get('is_done', None)
-
-    todo = Todo.objects.get(id=todo_id)
-
-    todo.is_done = is_done == 'true'
-
-    todo.save()
-
-    return HttpResponse('Success')
 
 
 # https://stackoverflow.com/questions/32465052/using-typeahead-js-in-django-project
@@ -676,7 +572,7 @@ class TaskView(View):
         query = request.GET.get('query', '')
         project_id = request.GET.get('project_id', None)
 
-        project_id = None if project_id == 'null' else project_id
+        project_id = None if project_id in ['null', 'undefined'] else project_id
 
         if project_id:
             tasks = Task.objects.filter(name__icontains=query, project__id=project_id)

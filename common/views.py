@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 # Create your views here.
 def process_ajax_request(request, method='POST'):
     """
@@ -28,7 +31,9 @@ def process_ajax_request(request, method='POST'):
     if is_ajax:
         if request.method == method:
             data = request.POST
+            logger.debug(f'AJAX request: {data}')
             return data
 
+    logger.error(f"Invalid AJAX request: {request}")
     raise(ValueError("Invalid AJAX request"))
 

@@ -42,9 +42,11 @@ if allowed_host_from_env:
 # Application definition
 
 INSTALLED_APPS = [
+    'django_crontab',
     'time_tracker.apps.TimeTrackerConfig',
     'sticky_note.apps.StickyNoteConfig',
     'status.apps.StatusConfig',
+    'todo.apps.TodoConfig',
     'user.apps.UserConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -153,10 +155,50 @@ LOGOUT_REDIRECT_URL = 'home'
 
 AUTH_USER_MODEL = 'user.User'
 
+# Make the log directory if it doesn't exist
+# Custom variables for logging
+LOG_FILE_DIR = os.path.join(BASE_DIR, ".logs")
+if not os.path.exists(LOG_FILE_DIR):
+    os.makedirs(LOG_FILE_DIR)
+
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
+    "version": 1, # the dictConfig format versio
+    "disable_existing_loggers": False, # retain the default loggers
     "handlers": {
-        "console": {"class": "logging.StreamHandler",},
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+            "formatter": "simple"
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "{}/debug.log".format(LOG_FILE_DIR),
+            "level": "DEBUG",
+            "formatter": "verbose"
+        },
     },
+    "loggers": {
+        # Unnamed namespace -> pricess records from all loggers
+        "": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            }
+        },
+    "formatters": {
+        "verbose": {
+            "format": "[{levelname}] {asctime} | {name} > {module} > {funcName} | {message}",
+            "datefmt": "%Y-%m-%d %H:%M:%S%z", # strftime() format
+            "style": "{", # speficy { forstr.frmat()
+        },
+        "simple": {
+            # Also include the logger name
+            "format": "[{levelname}] {asctime} | {name} | {message}",
+            "datefmt": "%Y-%m-%d %H:%M:%S %Z", # strftime() format
+            "style": "{",
+        },
+    }
 }
+
+CRONJOBS = [
+    (0 0 * * *, 'todo.management.repeatableTodoUtils.checkRepeatableTodos')
+]

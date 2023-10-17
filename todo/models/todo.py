@@ -32,8 +32,11 @@ class Todo(BaseModel):
     is_done = models.BooleanField(default=False)
     task = models.ForeignKey("time_tracker.Task", on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey("time_tracker.Project", on_delete=models.SET_NULL, null=True, blank=True)
-    linked_to = models.ForeignKey("time_tracker.Todo", on_delete=models.SET_NULL, null=True, blank=True)
+    linked_to = models.ForeignKey("todo.Todo", on_delete=models.SET_NULL, null=True, blank=True)
 
+    # 1-1 relationship with todo_repeat
+    todo_repeat = models.OneToOneField("todo.TodoRepeat", on_delete=models.SET_NULL, null=True,
+                                    blank=True, default=None, related_name="related_todo")
 
     def __str__(self):
         return self.name 
