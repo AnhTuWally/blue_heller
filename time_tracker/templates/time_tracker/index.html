@@ -879,6 +879,14 @@
             });
 
 
+            $('#blur-background').on('click', function (event) {
+                {% comment %} length here is like len of the array returned by cloest function {% endcomment %}
+                if( !$(event.target).closest('.focused-element-container').length ){
+                    $('#blur-background').css('display', 'none');
+                }
+            });
+
+
             load_active_tasks();
 
             load_timeline('all');
@@ -1161,10 +1169,45 @@
         #timeline-container{
             padding: 10px;
         }
+        
+        
+        #blur-background{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(50, 50, 50, 0.6);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        .focused-element-container{
+            padding:10px 10px 10px 10px;
+            display: flex;
+            z-index: 105;
+        }
+
+        .focused-element{
+            padding: 10px 10px 10px 10px;
+            background: #000;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
+    {% comment %} aria-hidden -> the content is hidden from assistive technologies. {% endcomment %}
+    <div id='blur-background' style='aria-hidden':"true";>
+        <div class='focused-element-container' tabindex='0'>
+            <div class='focused-element'>
+                FOCUS ON THIS
+            </div>
+        </div>
+    </div>
+
     <div class="main-menu">
         <div class="user-selection">
             {% comment %} 

@@ -1,0 +1,56 @@
+<!-- todo/templates/todo/single_todo.html -->
+
+<style>
+    .single-todo{
+        display: flex;
+        flex-direction: column;
+    }
+
+    #box{
+        width: 200px;
+        height: 200px;
+        border: 1px solid white;
+        border-radius: 10%;
+        background-image: linear-gradient(to right, pink 1px, transparent 1px), linear-gradient(to bottom, pink 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+
+    #circle{
+        width: 18px;
+        height: 18px;
+        border-radius: 20%;
+        background-color: red;
+    }
+</style>
+
+<script>
+    $(function() {
+        $("#circle").draggable({
+            containment: "#box",
+            grid: [20, 20],
+        });
+    });
+</script>
+
+{% comment %} This is a way for user to edits change the property of a todo {% endcomment %}
+<div class='single-todo' todo_id="{{todo.id}}">
+    <div id='todo-name'> 
+        <div>
+            <input type="checkbox" class="todo-checkbox" id="checkbox-{{ todo.id }}" value="is_done" todo_id={{ todo.id }} {% if todo.is_done %} checked {% endif %}>
+            <label for="checkbox-{{ todo.id }}"> {{ todo.name }} </label> 
+        </div>
+    {% if todo.task %}
+        <div id='todo-task'> {{ todo.task.name }} - {{ todo.task.project.name }}</div>
+    {% endif %}
+    <div id='todo-priority'> Priority: {{ todo.priority }} </div>
+    <div id='todo-ugency'> Urgency: {{ todo.urgency }}</div>
+    {% if todo.todo_repeat %}
+        <div id='todo-repeat'> Repeat: {{ todo.todo_repeat }} </div>
+    {% endif %}
+    {% comment %} Button to save the changes {% endcomment %}
+
+    <div id='box'>
+        <div id="circle"></div>
+    </div>
+    <button id='save-todo'> Save </button>
+</div>

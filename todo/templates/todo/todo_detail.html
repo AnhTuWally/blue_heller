@@ -1,4 +1,4 @@
-<!-- time_tracker/templates/time_tracker/todo_detail.html -->
+<!-- todo/templates/todo/todo_detail.html -->
 
 <style>
     .todos-container{
@@ -190,6 +190,31 @@
         });
     }
 
+
+    function viewSingleTodo(element){
+        todo_id = $(element).attr('todo_id');
+        console.log("HIHIHIH")
+
+        var data = {
+            'todo_id': todo_id,
+        }
+
+        const success_callback  = function(response){
+            console.log("Sucessfully loaded tod with id: " + todo_id);
+            $('#blur-background').css('display', 'flex');
+            $('.focused-element').html(response);
+        }
+
+        const error_callback = function(response){
+            console.error("Unable to view todo");
+            console.log(response);
+        }
+
+        ajax_post_request("{% url 'todo:single_todo' %}", 
+                        "{{ csrf_token }}", data, success_callback, error_callback);
+    }
+
+
     $(document).ready(function (){
         $('.todo-priority').each(function(){
             var value = $(this).attr('value');
@@ -210,6 +235,11 @@
 
         $('#new-todo-repeat-type').change(function(){
             showHideWeeklyDateSelector();
+        });
+
+
+        $('.todo-item').click(function(){
+            viewSingleTodo(this);
         });
 
         updateRepeatDaysLabels();
@@ -290,7 +320,7 @@
 <div class="todos-container">
     {% if not_done_todos %}
         {% for todo in not_done_todos %}
-            <div class='todo-item'>
+            <div class='todo-item' todo_id='{{ todo.id }}'>
                 <div class="todo-info">
                     <div>
                         <input type="checkbox" class="todo-checkbox" id="checkbox-{{ todo.id }}" value="is_done" todo_id={{ todo.id }} {% if todo.is_done %} checked {% endif %}>
@@ -337,7 +367,7 @@
 
     {% if is_done_todos %}
         {% for todo in is_done_todos %}
-            <div class='todo-item'>
+            <div class='todo-item' todo_id={{ todo.id }}>
                 <div class="todo-info">
                     <div>
                         <input type="checkbox" class="todo-checkbox" id="checkbox-{{ todo.id }}" value="is_done" todo_id={{ todo.id }} {% if todo.is_done %} checked {% endif %}>

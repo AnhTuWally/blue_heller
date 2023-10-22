@@ -81,6 +81,9 @@ This is an app that provides the sticky notes to the system
 - [ ] Test if it make more sense to have an add note button to focus user on an area to add note instead of having it kind of attach to the note section at the moment. 
 - [ ] Add the feature where user can edit old notes and the title should not be an input field =))
 
+2023/10/19
+
+- https://javascript.daypilot.org/
 
 LOW-PRIO TODO:
 - [ ] DEBUG -> whenever the timer stop the timeline does not stop

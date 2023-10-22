@@ -52,6 +52,19 @@ def todo_detail(request):
     return render(request, 'todo/todo_detail.html', context)
 
 
+def single_todo(request):
+    data = process_ajax_request(request)
+
+    todo_id = data.get('todo_id', None)
+
+    todo = Todo.objects.get(id=todo_id)
+
+    context = {'todo': todo}
+
+
+    return render(request, 'todo/single_todo.html', context)
+
+
 def weekDayToInt(week_day):
     """Convert the weekday string to an int
     0 represents monday -> 6 represents sunday
