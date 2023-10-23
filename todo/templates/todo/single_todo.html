@@ -7,27 +7,29 @@
     }
 
     #box{
-        width: 200px;
-        height: 200px;
+        width: 220px;
+        height: 120px;
         border: 1px solid white;
         border-radius: 10%;
-        background-image: linear-gradient(to right, pink 1px, transparent 1px), linear-gradient(to bottom, pink 1px, transparent 1px);
+
         background-size: 20px 20px;
     }
 
-    #circle{
+    
+    #indicator{
         width: 18px;
         height: 18px;
         border-radius: 20%;
         background-color: red;
+        top: {{ top_pos }}px;
+        left: {{ left_pos }}px;
     }
 </style>
 
 <script>
     $(function() {
-        $("#circle").draggable({
+        $("#indicator").draggable({
             containment: "#box",
-            grid: [20, 20],
         });
     });
 </script>
@@ -50,7 +52,7 @@
     {% comment %} Button to save the changes {% endcomment %}
 
     <div id='box'>
-        <div id="circle"></div>
+        <div id="indicator"></div>
     </div>
     <button id='save-todo'> Save </button>
 </div>

@@ -58,9 +58,18 @@ def single_todo(request):
     todo_id = data.get('todo_id', None)
 
     todo = Todo.objects.get(id=todo_id)
+    
+    # Math explain
+    # There are 100 pixels and 5 levels of urgency
+    # => 20 pixels per level of urgency
+    # We also want the indicator to starts from the bottom
+    # => 100 - 20*urgency
+    top_pos = 100 - 20*todo.urgency
 
-    context = {'todo': todo}
+    # Math similar to above but it's 200px and priority ranges from 0 to 100
+    left_pos = 2*todo.priority
 
+    context = {'todo': todo, 'top_pos': top_pos, 'left_pos': left_pos}
 
     return render(request, 'todo/single_todo.html', context)
 

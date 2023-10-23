@@ -57,12 +57,12 @@ This is an app that provides the sticky notes to the system
     - Console handler print out the simple version of the log
     - File handler print out the verboose version of the log
       - By default the file handler is saved to .logs / debug.log
-- [ ] Add Eisenhower Matrix to UI/webview
+- [X] ~~*Add Eisenhower Matrix to UI/webview*~~ [2023-10-23]
 - [ ] Add the task_timer's note to the UI/webview
+  - The purpose of task_timer's note is like a short diary/note on what was done during that time.
+    - [ ] A button on active task to add note using the single/focus view
+    - [ ] The task timer view need some update + a button to edit the note for that task timer
 - [ ] Add the Project and Task description to the UI/webview
-- [ ] Debug static/js/index,js so that when the user press enter while they are in the 
-    project filter, the page will open the most left project
-
 
 2023/10/01
 - [ ] Refactoring -> time_tracker/views.py
@@ -81,18 +81,21 @@ This is an app that provides the sticky notes to the system
 - [ ] Test if it make more sense to have an add note button to focus user on an area to add note instead of having it kind of attach to the note section at the moment. 
 - [ ] Add the feature where user can edit old notes and the title should not be an input field =))
 
-2023/10/19
 
-- https://javascript.daypilot.org/
+2023/10/23:
+- update active task display to be fixed to the bottom 
+- [ ] single_todo.html needed to be edit so that it can send edited data to server. E.G. when the Eissenhower matrix is edited -> [Save] -> Data is sent to the server
+
 
 LOW-PRIO TODO:
+- [ ] Debug static/js/index,js so that when the user press enter while they are in the project filter, the page will open the most left project
 - [ ] DEBUG -> whenever the timer stop the timeline does not stop
 - [ ] Adding registration page
 - [ ] Investigate "Style sheet could not be loaded `static/scss/bootstrap.scss`
 - [ ] When timeline in clicked, do something
 - [ ] Adding function to delete status 
 - [ ] Adding more logging statement into python functions
-
+- An way to shows weekly activity: https://javascript.daypilot.org/
 
 # Change Logo
 

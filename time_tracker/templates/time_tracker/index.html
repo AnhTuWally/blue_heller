@@ -230,7 +230,7 @@
 
             current_start_time = $(`.start-time-display[active_task_id="${task_id}"]`).html().trim();
             
-            $(`.start-time-display[active_task_id="${task_id}"]`).html(`<input type="text" class='active_start_time_edit' active_task_id="${task_id}" value="${current_start_time}">`);
+            $(`.start-time-display[active_task_id="${task_id}"]`).html(`<input type="text" class='active-start-time-edit' active_task_id="${task_id}" value="${current_start_time}">`);
             
             $(`.edit-start-time-button[active_task_id="${task_id}"]`).hide();
             $(`.send-edit-start-time-button[active_task_id="${task_id}"]`).show();
@@ -346,7 +346,7 @@
         function send_edit_start_time(element){
             var active_task_id = $(element).attr('active_task_id');
 
-            var start_time_value = $(`.active_start_time_edit[active_task_id="${active_task_id}"]`).val().trim();
+            var start_time_value = $(`.active-start-time-edit[active_task_id="${active_task_id}"]`).val().trim();
 
             data = {
                 'active_task_id': active_task_id,
@@ -1036,19 +1036,26 @@
         }
 
         #active-task-container{
-            color: #77DD77;
-            background: #3e4057;
+            position: fixed;
+            bottom:0;
+            left: 0;
+            width: 100%;
+            color: #fff;
+            background: #313390;
+            z-index: 10;
             display: flex; 
             justify-content: center;
+            flex-direction: column;
         }
 
         .active-task{
             display:flex;
-            align-item:center;
-            justify-content:space-between;
+            align-items:center;
             flex-wrap:wrap;
-            border: 1px solid #ded70d;
-            margin: 20px;
+            justify-content:space-between;
+            border: 1px solid #000;
+            border-radius: 10px;
+            {% comment %} margin: 20px; {% endcomment %}
             padding: 10px;
         }
 
@@ -1056,14 +1063,37 @@
             display:flex;
             flex-wrap:wrap;
             justify-content:flex-start;
-        }
-
-        .active-task-path div{
-            margin: 10px;
+            align-items: center;
+            gap: 10px;
         }
 
         .active-task-time-display{
-            margin: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .start-time{
+            display: flex;
+            align-items:center;
+            gap: 10px;
+        }
+
+        .active-start-time-edit{
+            width: 150px;
+        }
+
+        .time-elapsed{
+            display: flex;
+            align-items:center;
+            gap: 10px;
+        }
+
+        .active-task-time-display button{
+            border-radius: 10%;
+            background: #69F0AE;
+            color: #212121;
+            border: 0px;
+            height: 30px;
         }
 
 
