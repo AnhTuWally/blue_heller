@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% comment %} 
+This is how people map the relationship between projects, tasks, todos, and users.
+{% endcomment %}
+
+
+{% block extra-css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'drawflow/drawflow.min.css' %}">
+    <link rel="stylesheet" href="{% static 'drawflow/beautiful.css' %}">
+{% endblock %}
+
+{% block extra-js%}
+    <script src="{% static 'drawflow/drawflow.min.js' %}"></script>
+
+    <script type="text/javascript"> 
+
+        function allowDrop(ev){
+            ev.preventDefault();
+        }
+
+        
+        function drag(ev){
+            {% comment %} 
+                if drag item that are in the menu -> create new one
+                if drag item that are in the editor -> move the data-node
+            {% endcomment %}
+            if (ev.type == "touchstart"){
+                mobile_item_selec = ev.target.closet(".drag-drawflow").getAttribute('data-node');
+            } else {
+                ev.dataTransfer.setData("node", ev.target.getAttribute('data-node'));
+            }
+        }
+
+
+        function drop(ev){
+            if (ev.type == "touchend"){
+                var parentdrawflow = document.elementFromPoint( mobile_last_move.touches[0].clientX, 
+                mobile_last_move.touches[0].clientY).closet("#drawflow");
+
+                if(parentdrawflow != null){
+                    addNodeToDrawFlow(mobile_item_selec, mobile_last_move.touches[0].clientX, 
+                    mobile_last_move.touches[0].clientY);
+                }
+                mobile_item_selec = '';
+            } else {
+                ev.preventDefault();
+                var data = ev.dataTransfer.getData("node");
+                addNodeToDrawFlow(data, 'object_id', ev.clientX, ev.clientY);
+            }
+        }
+
+        function createManagementNode(type, name, id, pos_x, pos_y){
+            {% comment %} 
+                type can be one of the 3:
+                    - project
+                    - task
+                    - todo 
+            {% endcomment %}
+            var html = `
+            <div>
+                <div style="padding:15px">
+                    ${type}: ${name}
+                </div>
+            </div>
+            `;
+
+            var data = { "type": type,
+                         "name": name,
+                         "id": id
+                        };
+            
+
+            {% comment %}
+                [name, number of inputs, number of outputs, 
+                pos_x, pos_y, class, data, html]
+            {% endcomment %}
+
+            add_node_args = [name, 1, 1, pos_x, pos_y, 'management',
+                            data, html]
+            
+            return add_node_args
+        }
+
+
+
+        /* DRAG EVENT */
+
+        /* Mouse and Touch Actions */
+        
+        function enableTouchDrag(element){
+            {% comment %} 
+                this function is used to add the touch ability to the drag-drawflow element
+
+                e.g: 
+                $('.drag-drawflow').each(enableTouchDrag)
+
+            {% endcomment %}
+            element.addEventListener('touchend', drop, false);
+            element.addEventListener('touchmove', positiononMobile, false);
+            element.addEventListener('touchstart', drag, false)
+        }
+        
+        var mobile_item_selec = '';
+        var mobile_last_move = null;
+
+        function positiononMobile(ev){
+            mobile_last_move = ev;
+        }
+
+
+        function addNodeToDrawFlow(name, object_id, pos_x, pos_y){
+
+            {% comment %} If the editor is in fixed mode -> do nothing {% endcomment %}
+            editor = getEditor();
+            
+
+            if(editor.editor_mode === 'fixed'){
+                return false;
+            }
+
+            pos_x = pos_x * ( editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)) - (editor.precanvas.getBoundingClientRect().x * ( editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)));
+            pos_y = pos_y * ( editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)) - (editor.precanvas.getBoundingClientRect().y * ( editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)));
+            
+            new_node_args = createManagementNode(name, name, object_id, pos_x, pos_y);
+
+            console.log(new_node_args);
+            editor.addNode(...new_node_args);
+        }
+
+        var editor;
+        function getEditor(){
+            return editor
+        }
+
+
+        $(document).ready(function() {
+
+            {% comment %} INIT drawflow graph {% endcomment %}
+            var id = document.getElementById("drawflow");
+            editor = new Drawflow(id);
+            editor.start();
+
+
+            console.log(editor)
+
+
+            project_test_args = createManagementNode(
+                "project", "Test", "test_id", 0, 0
+            )
+
+            editor.addNode(...project_test_args)
+
+        });
+    </script>
+{% endblock %}
+
+
+{% block content %}
+    <div class="wrapper">
+        <div class="col">
+            <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="project-node">
+                <i class="fab fa-project"></i><span>Project</span>
+            </div>
+            <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="task-node">
+                <i class="fab fa-task"></i><span>Task</span>
+            </div>
+            <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="todo-node">
+                <i class="fab fa-todo"></i><span>Todo</span>
+            </div>
+        </div>
+        <div class="col-right">
+            <div class="menu">
+                <ul>
+                    <li onclick="editor.changeModule('workflow_1'); changeModule(event);">Workflow 1</li>
+                </ul>
+            </div>
+            <div id="drawflow" ondrop="drop(event)" ondragover="allowDrop(event)">
+
+                <div class="btn-export" onclick="Swal.fire({ title: 'Export',
+                html: '<pre><code>'+JSON.stringify(editor.export(), null,4)+'</code></pre>'
+                })">
+                    Export
+                </div>
+
+                <div class="btn-clear" onclick="editor.clearModuleSelected()">
+                    Clear
+                </div>
+
+                <div class="btn-lock">
+                  <i id="lock" class="fas fa-lock" onclick="editor.editor_mode='fixed'; changeMode('lock');"></i>
+                  <i id="unlock" class="fas fa-lock-open" onclick="editor.editor_mode='edit'; changeMode('unlock');" style="display:none;"></i>
+                </div>
+
+                <div class="bar-zoom">
+                  <i class="fas fa-search-minus" onclick="editor.zoom_out()"></i>
+                  <i class="fas fa-search" onclick="editor.zoom_reset()"></i>
+                  <i class="fas fa-search-plus" onclick="editor.zoom_in()"></i>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

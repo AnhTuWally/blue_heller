@@ -46,6 +46,17 @@ def index(request):
     
     return render(request, 'time_tracker/index.html', context) 
 
+def node_editor(requests):
+    """ A function to render the node editor page
+
+    Args:
+        requests (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    context = {}
+    return render(requests, 'time_tracker/node_editor.html', context)
 
 # PROJECT
 def project_detail(request):

@@ -30,7 +30,7 @@ This has two section
     {% for note in notes %}
         <div class='card note-card'>
             <div clas='card-header'>
-                <input type="text" class="note-name" note_id={{note.id}} placeholder={{note.name}}>
+                {{ note.name }}
             </div>
             <div class='card-body'>
                 {% comment %} The note is shown using html {% endcomment %}

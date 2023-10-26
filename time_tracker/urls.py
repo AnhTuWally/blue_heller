@@ -22,4 +22,5 @@ urlpatterns = [
     path(r'list_tasks', views.TaskView.as_view(), name='list_tasks'),
     path(r'change_start_time', views.change_start_time, name='change_start_time'),
     path(r'load_active_tasks', views.load_active_tasks, name='load_active_tasks'),
+    path(r'node_editor', views.node_editor, name='node_editor'),
 ]
