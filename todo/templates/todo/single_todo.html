@@ -6,33 +6,23 @@
         flex-direction: column;
     }
 
-    #box{
-        width: 220px;
-        height: 120px;
-        border: 1px solid white;
-        border-radius: 10%;
-
-        background-size: 20px 20px;
+    .canvas-container {
+        overflow: hidden;
+        border: 1px solid rgb(100, 100, 100);
+        width: 100%;
+        min-width: 200px;
+        min-height: 200px;
+        max-width: 550px;
+        max-height: 300px;
+        border-radius: 30px;
     }
 
-    
-    #indicator{
-        width: 18px;
-        height: 18px;
-        border-radius: 20%;
-        background-color: red;
-        top: {{ top_pos }}px;
-        left: {{ left_pos }}px;
+    canvas{
+        border-radius: 30px;
+        padding: 10px 10px 10px 10px;
     }
 </style>
 
-<script>
-    $(function() {
-        $("#indicator").draggable({
-            containment: "#box",
-        });
-    });
-</script>
 
 {% comment %} This is a way for user to edits change the property of a todo {% endcomment %}
 <div class='single-todo' todo_id="{{todo.id}}">
@@ -51,8 +41,174 @@
     {% endif %}
     {% comment %} Button to save the changes {% endcomment %}
 
-    <div id='box'>
-        <div id="indicator"></div>
+    <div class='canvas-container'>
+        <canvas
+            id="canvas-matrix"
+            data-base-width= "550"
+            data-base-height= "300"
+            data-scrawl-canvas
+            data-is-responsive="true"
+            data-fit="contain"
+        ></canvas>
     </div>
+
     <button id='save-todo'> Save </button>
 </div>
+
+{% load static %}
+<script type="module" >
+    import * as scrawl from "{% static 'scrawl.js' %}"
+    // Constants that are used for drawing
+    const canvas_width = 550;
+    const canvas_height = 300;
+
+    const delta = 50;
+    const max_x = canvas_width-delta;
+    const max_y = canvas_height-delta ;
+
+    const namespace = 'matrix';
+    const name = (n) => `${namespace}-${n})`;
+
+    $(document).ready(function(){
+        const canvas = scrawl.getCanvas('canvas-matrix');
+
+        canvas.set({
+            backgroundColor: 'rgb(100, 100, 100)'
+        }).setAsCurrentCanvas();
+        
+        // Drawing the vertical and horizontal lines
+        let vertical_line = scrawl.makeLine({
+            name: name('vertical-line'),
+
+            startX: delta,
+            startY: '0',
+
+            endX: delta,
+            endY: '100%',
+
+            lineWidth: 3,
+            strokeStyle: 'rgb(150, 150, 150)',
+            method: 'draw',
+        })
+
+        for(let i=2*delta; i < canvas_width; i+= delta){
+            vertical_line.clone({
+                startX: i,
+                endX: i,
+            });
+        }
+
+        let horizontal_line= scrawl.makeLine({
+            name: name('horizontal-line'),
+
+            startX: '0',
+            startY: delta,
+
+            endX: '100%',
+            endY: delta,
+
+            lineWidth: 3,
+            strokeStyle: 'rgb(150, 150, 150)',
+            method: 'draw',
+        })
+
+        for(let i=2*delta; i < canvas_height; i+= delta){
+            horizontal_line.clone({
+                startY: i,
+                endY: i,
+            });
+        }
+        
+        // indicator is what is shown as the current
+        // position of the indicator
+        const indicator = scrawl.makeBlock({
+            name: name('indicator'),
+            dimensions: [delta, delta],
+            strokeStyle: 'rgb(59, 255, 0)',
+            lineWidth: 1,
+            method: "draw",
+        });
+        
+        // indicator-mover is what the user uses
+        // to set the new position of the indicator
+        const indicator_mover = scrawl.makeBlock({
+            name: name('indicator-mover'),
+            dimensions: [delta, delta],
+            fillStyle: 'rgba(146, 230, 26, 0.8)',
+        });
+        
+        // Make a group so that the only thing
+        // that can be drag/move is the indicator mover
+        scrawl.makeGroup({
+            name: name('draggable'),
+        }).addArtefacts(name('indicator-mover'));
+
+        const updateIndicatorPosition = function(){
+            // A function that take a look
+            // at the indicator mover position
+            // To update hte indicator's position
+            
+            // Get the mover's position
+            let [x, y] = indicator_mover.get('position');
+            
+            // Checking if the mover is out of boundary
+            // boundary 
+            if(x < 0) x=0;
+            if(x > max_x) x=max_x;
+
+            if(y < 0) y=0;
+            if(y > max_y) y=max_y;
+
+            // y axis snap. 
+            // We want the indicator to snap to 1 out of 6 levels
+            let cy = Math.floor( y/delta + 0.5);
+            y = cy*delta;
+            
+
+            // Update the position of the indicator
+            indicator.set({
+                startX: x,
+                startY: y,
+                lineWidth: 3,
+            });
+        }
+
+        const exitDrag = function() {
+            // A function that is run when drag action is finished
+            // This function is run to update the position of the indicator mover
+            // So that the mover will snap to the mover for the next time the user try to move it
+           
+            // Get the position of the indicator
+            let [x, y]= indicator.get('position');
+
+
+            // Move the mover to the indicator
+            indicator_mover.set({
+                startX: x,
+                startY: y,
+            });
+            
+
+            // reset the line width of the indicator
+            indicator.set({
+                lineWidth: 1,
+            });
+        }
+
+        const dragActions = scrawl.makeDragZone({
+            zone: canvas,
+            endOn: ['up', 'leave'],
+            exposeCurrentArtefact: true,
+            updateWhileMoving: updateIndicatorPosition,
+            updateOnEnd: exitDrag,
+            preventTouchDefaultWhenDragging: true,
+            collisionGroup: name('draggable'),
+        });
+
+        // draw the canvas
+        scrawl.makeRender({
+            name: name('animation'),
+            target: canvas,
+        });
+    })
+</script>

@@ -29,6 +29,13 @@
             <script type="text/javascript" src="{% static 'vis-timeline-graph2d.min.js' %}"></script>
             <script type="text/javascript" src="{% static 'typeahead.bundle.js' %}"></script>
             <script type="text/javascript" src="{% static '/quilljs/quill.min.js' %}"></script>
+
+            <script type="module">
+                import * as scrawl from "{% static '/scrawl.js' %}"
+                const test = scrawl;
+                console.log("test");
+                console.log(test);
+            </script>
         {% endblock %}
 
         {% block extra-js%}
