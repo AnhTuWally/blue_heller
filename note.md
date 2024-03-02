@@ -83,8 +83,13 @@ This is an app that provides the sticky notes to the system
 
 
 2023/10/23:
-- update active task display to be fixed to the bottom 
-- [ ] single_todo.html needed to be edit so that it can send edited data to server. E.G. when the Eissenhower matrix is edited -> [Save] -> Data is sent to the server
+- [X] ~~*update active task display to be fixed to the bottom*~~ [2023-11-07] 
+- [X] ~~*single_todo.html needed to be edit so that it can send edited data to server. E.G. when the Eissenhower matrix is edited -> [Save] -> Data is sent to the server*~~ [2023-11-07]
+
+
+2023/11/07
+- [ ] single_todo.html perfomance issue with chrome + not working after second load
+- [ ] a broadcasting signals system where if an task/todo was stop/updated the other session also get updated
 
 
 LOW-PRIO TODO:

@@ -239,6 +239,30 @@
 
         }
 
+        function show_task_timer_note(element){
+            var active_task_id = $(element).attr('active_task_id');
+            var user_id = $('.current_user').attr('user_id');
+
+            data = {
+                'active_task_id': active_task_id,
+                'user_id': user_id
+            }
+
+            const success_callback  = function(response){
+                $('#blur-background').css('display', 'flex');
+                $('.focused-element').html(response);
+            }
+
+            const error_callback = function(response){
+                console.error("Unable to view active task note");
+                console.log(response);
+            }
+
+            ajax_post_request("{% url 'time_tracker:view_active_task_note' %}", 
+                            "{{ csrf_token }}", data, success_callback, error_callback);
+
+        }
+
         function stop_task(element) {
             var active_task_id = $(element).attr('active_task_id');
             var user_id = $('.current_user').attr('user_id');
@@ -761,6 +785,12 @@
                 stop_task(this);
             });
 
+
+            $("#active-task-container").on('click', ".task-timer-note-button", function () {
+                show_task_timer_note(this);
+            });
+
+
             $("#active-task-container").on('click', ".edit-start-time-button", function () {
                 edit_start_time(this);
             });
@@ -883,6 +913,7 @@
                 {% comment %} length here is like len of the array returned by cloest function {% endcomment %}
                 if( !$(event.target).closest('.focused-element-container').length ){
                     $('#blur-background').css('display', 'none');
+                    console.log("Closed blur-background");
                 }
             });
 
@@ -977,6 +1008,13 @@
             margin:10px; 
             text-align:center;
             border: 1px solid green;
+            min-width: 300px;
+        }
+
+        .task-timer-item{
+            margin:10px; 
+            text-align:center;
+            border: 1px solid rgb(230,169,26);
             min-width: 300px;
         }
 

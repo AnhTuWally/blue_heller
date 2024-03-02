@@ -1,12 +1,11 @@
 <!-- time_tracker/templates/time_tracker/task_detail.html -->
-
 {% if not task_timer_list%}
     <div style='color:#fff;'>
         This task has not been started yet.
     </div>
 {% else %}
     {% for timer in task_timer_list %}
-        <div class='card task-item'>
+        <div class='card task-timer-item'>
             <div class="card-header">
                 <div> 
                     Start Time

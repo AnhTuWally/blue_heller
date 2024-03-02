@@ -1,36 +1,86 @@
 <!-- time_tracker/templates/time_tracker/active_task_detail.html -->
+<style>
+    .active-task-note{
+        display: flex;
+        flex-direction: column;
+    }
+    .new-note{
+        min-height: 100px;
+    }
+
+</style>
 
 {% for active_task in active_tasks %}
-    <div class='active-task'>
-        <div class='active-task-path'>
-            <div>
-                <button class="open-project-button" project_id = {{active_task.project.id}} >
-                    {{active_task.project.name}}
-                </button>
-            </div>
-            <div>
-                <button class="view-task-button" task_id={{active_task.task.id}}>{{ active_task.task.name }}</button>
-            </div>
-        </div>
+    <div>
         
-        <div class='active-task-time-display'>
-            <div class='start-time'>
-                <div>Start Time:</div>
-                <div class="start-time-display" active_task_id={{active_task.id}}>
-                    {{active_task.start_time| date:"Y-m-d H:i"}}
+        <!--
+        {% comment %} Disable note input for now {% endcomment %}
+        <div class='active-task-note' active_task_id={{ active_task.id }}>
+            <div>
+                {% if active_task.note %}
+                    active_task.note 
+                {% endif %}
+            </div>
+            
+            {% comment %} This will be replaced by quill js {% endcomment %}
+            <div class="new-note-container">
+                <div class='new-note'></div>
+            </div>
+
+            <button class="save-new-active-task-note">
+                Save Note
+            </button>
+        </div>
+        -->
+
+        <div class='active-task'>
+            <div class='active-task-path'>
+                <div>
+                    <button class="open-project-button" project_id = {{active_task.project.id}} >
+                        {{active_task.project.name}}
+                    </button>
                 </div>
-                <button class="edit-start-time-button" active_task_id={{active_task.id}}>Edit</button>
-                <button class="send-edit-start-time-button" active_task_id={{active_task.id}} style="display:none">Done</button>
+                <div>
+                    <button class="view-task-button" task_id={{active_task.task.id}}>{{ active_task.task.name }}</button>
+                </div>
             </div>
-            <div class='time-elapsed'>
-                <div>Time Elapsed:</div>
-                <time class="timer" start_time = {{ active_task.start_time.timestamp }}>0:00:00</time>
+
+            <div class='active-task-time-display'>
+                <div class='start-time'>
+                    <div>Start Time:</div>
+                    <div class="start-time-display" active_task_id={{active_task.id}}>
+                        {{active_task.start_time| date:"Y-m-d H:i"}}
+                    </div>
+                    <button class="edit-start-time-button" active_task_id={{active_task.id}}>Edit</button>
+                    <button class="send-edit-start-time-button" active_task_id={{active_task.id}} style="display:none">Done</button>
+                </div>
+                <div class='time-elapsed'>
+                    <div>Time Elapsed:</div>
+                    <time class="timer" start_time = {{ active_task.start_time.timestamp }}>0:00:00</time>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <button type="submit" class="btn btn-danger stop-task-button" active_task_id={{active_task.id}}>Stop</button>
-        </div>
+            <div>
+                <button type="submit" class="btn task-timer-note-button" active_task_id={{active_task.id}}>Note</button>
+                <button type="submit" class="btn btn-danger stop-task-button" active_task_id={{active_task.id}}>Stop</button>
+            </div>
 
+        </div>
     </div>
 {% endfor %}
+
+
+<script>
+    var quill = new Quill('.new-note', {
+        modules: {
+            toolbar: [
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['bold', 'italic', 'underline'],
+                [{ 'color': ['#fff', 'red', 'green']}],
+                ['code', 'blockquote', 'code-block']
+            ]
+      },
+        placeholder: 'Compose an epic...',
+        theme: 'snow'  // or 'bubble'
+    });
+</script>

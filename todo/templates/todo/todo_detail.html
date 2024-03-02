@@ -193,7 +193,6 @@
 
     function viewSingleTodo(element){
         todo_id = $(element).attr('todo_id');
-        console.log("HIHIHIH")
 
         var data = {
             'todo_id': todo_id,
@@ -239,7 +238,10 @@
 
 
         $('.todo-item').click(function(){
-            viewSingleTodo(this);
+            console.log("Clicked on todo item");
+            // NOTE: this is disabled because it show up even when the checkbox is clicked
+            // I need a dedicated edit button to view the todo
+            {% comment %} viewSingleTodo(this); {% endcomment %}
         });
 
         updateRepeatDaysLabels();

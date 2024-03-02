@@ -450,13 +450,37 @@ def change_start_time(request):
         return HttpResponseBadRequest('Invalid start time')
 
     active_task = ActiveTask.objects.get(id=active_task_id)
-    active_task .start_time = start_time
+    active_task.start_time = start_time
 
     logger.debug("ActiveTask {} start time changed to {}".format(active_task, start_time))
 
     active_task.save()
 
     return HttpResponse('Success')
+
+
+def view_active_task_note(request):
+    """View Task timer
+
+    Args:
+        request (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    data = process_ajax_request(request)
+
+    active_task_id = data.get('active_task_id', None)
+
+    active_task = ActiveTask.objects.get(id=active_task_id)
+
+    active_task_note = active_task.note
+
+
+
+
+
 
 
 # TASK TIMER

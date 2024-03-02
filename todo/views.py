@@ -262,12 +262,32 @@ def update_todo(request):
 
     todo_id = data.get('todo_id', None)
     is_done = data.get('is_done', None)
+    priority = data.get('priority', None)
+    urgency = data.get('urgency', None)
 
     todo = Todo.objects.get(id=todo_id)
 
     old_is_done = todo.is_done
     todo.is_done = is_done == 'true'
     new_is_done = todo.is_done
+
+    if priority is not None:
+        try:
+            priority_value = int(priority)
+            todo.priority = priority_value
+        except ValueError:
+            logger.error(f"Invalid proirity value: {priority}.")
+    
+
+    if urgency is not None:
+        try:
+            urgency_value = int(urgency)
+            todo.urgency = urgency_value
+            logger.debug(f"{todo}'s urgency update to {urgency_value}")
+        except ValueError:
+            logger.error(f"Invalid urgency value {urgency}.")
+        
+
     todo.save()
 
     todo_history = TodoHistory(todo=todo,

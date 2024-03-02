@@ -1,5 +1,22 @@
 <!-- todo/templates/todo/single_todo.html -->
 
+{% comment %} 
+
+NOTE: 
+
+The indicator for some reason can only be dragged once,
+- This is because the draggable group changes name each time
+- If we can find a way to delete the old group before creating a new one
+- For now, we get the name by reference. 
+- scrawl name might be global, the way that we do it now only works once
+
+TODO: post on discord?
+TODO: click to move indicator
+
+
+
+{% endcomment %}
+
 <style>
     .single-todo{
         display: flex;
@@ -14,12 +31,19 @@
         min-height: 200px;
         max-width: 550px;
         max-height: 300px;
-        border-radius: 30px;
+        z-index: 110;
+        {% comment %} border-radius: 30px; {% endcomment %}
     }
 
     canvas{
-        border-radius: 30px;
+        {% comment %} border-radius: 30px; {% endcomment %}
         padding: 10px 10px 10px 10px;
+        z-index: 120;
+    }
+
+    .todo-info-container{
+        display: flex;
+        gap: 10px;
     }
 </style>
 
@@ -34,8 +58,14 @@
     {% if todo.task %}
         <div id='todo-task'> {{ todo.task.name }} - {{ todo.task.project.name }}</div>
     {% endif %}
-    <div id='todo-priority'> Priority: {{ todo.priority }} </div>
-    <div id='todo-ugency'> Urgency: {{ todo.urgency }}</div>
+    <div class='todo-info-container'>
+        <div>Priority: </div>
+        <div id='todo-priority' value={{ todo.priority }}> {{ todo.priority }} </div>
+    </div>
+    <div class='todo-info-container'>
+        <div>Urgency: </div>
+        <div id='todo-urgency' value={{ todo.urgency }}> {{ todo.urgency }}</div>
+    </div>
     {% if todo.todo_repeat %}
         <div id='todo-repeat'> Repeat: {{ todo.todo_repeat }} </div>
     {% endif %}
@@ -67,10 +97,48 @@
     const max_y = canvas_height-delta ;
 
     const namespace = 'matrix';
-    const name = (n) => `${namespace}-${n})`;
+    const name = (n) => `${namespace}-${n}`;
+
+
+    function saveChanges(){
+        const todo_id = '{{ todo.id }}';
+        const priority = $('#todo-priority').attr('value');
+        const urgency =$('#todo-urgency').attr('value');
+
+        // GOHERE
+        
+        const is_done = $('#checkbox-{{ todo.id }}').is(':checked');
+
+        var data = {
+            'todo_id': todo_id,
+            'is_done': is_done,
+            'priority': priority,
+            'urgency': urgency
+        }
+
+        const success_callback = function(response){
+            console.log("{{ todo.id }}  modified");
+            // Close the single todo view
+            // TODO: this is a bit crude. This needed to be optimized
+            $('#blur-background').css('display', 'none');
+        }
+
+        const error_callback = function(response){
+            console.log(response);
+        }
+
+        ajax_post_request("{% url 'todo:update_todo' %}", 
+                        "{{ csrf_token }}", data, success_callback, error_callback);
+
+    }
 
     $(document).ready(function(){
-        const canvas = scrawl.getCanvas('canvas-matrix');
+        $("#save-todo").on('click', saveChanges);
+
+        const canvas_id = 'canvas-matrix';
+        console.log(canvas_id);
+        const canvas = scrawl.getCanvas(canvas_id);
+
 
         canvas.set({
             backgroundColor: 'rgb(100, 100, 100)'
@@ -118,16 +186,34 @@
                 endY: i,
             });
         }
+
+        // Convert value to position;
+        const start_x = {{todo.priority}} * 5;
+        const start_y = (5 - {{ todo.urgency }}) * delta;
         
         // indicator is what is shown as the current
         // position of the indicator
+
+        scrawl.makeBlock({
+            name: name('test'),
+            dimensions: [delta, delta*2],
+            fillStyle: 'rgba(255, 50, 50, 0.6)',
+            startX: 250,
+            startY: 100,
+        })
+
         const indicator = scrawl.makeBlock({
             name: name('indicator'),
             dimensions: [delta, delta],
             strokeStyle: 'rgb(59, 255, 0)',
             lineWidth: 1,
             method: "draw",
+            startX: start_x,
+            startY: start_y,
         });
+
+        console.log(`indicator ${indicator}`);
+        console.log(`canvas ${canvas.name}`);
         
         // indicator-mover is what the user uses
         // to set the new position of the indicator
@@ -135,13 +221,18 @@
             name: name('indicator-mover'),
             dimensions: [delta, delta],
             fillStyle: 'rgba(146, 230, 26, 0.8)',
+            startX: start_x,
+            startY: start_y,
         });
+
         
         // Make a group so that the only thing
         // that can be drag/move is the indicator mover
-        scrawl.makeGroup({
+        const draggable_group = scrawl.makeGroup({
             name: name('draggable'),
-        }).addArtefacts(name('indicator-mover'));
+        });
+        draggable_group.addArtefacts(indicator_mover.name);
+
 
         const updateIndicatorPosition = function(){
             // A function that take a look
@@ -171,6 +262,21 @@
                 startY: y,
                 lineWidth: 3,
             });
+
+
+            const priority_value = Math.round(x/5);
+            const urgency_value = 5 - Math.round(y/delta);
+
+            // update the value
+            const todo_priority = $('#todo-priority');
+            const todo_urgency =$('#todo-urgency');
+
+            todo_priority.attr('value', `${priority_value}`);
+            todo_urgency.attr('value', `${urgency_value}`);
+
+            todo_priority.html(priority_value);
+            todo_urgency.html(urgency_value);
+
         }
 
         const exitDrag = function() {
@@ -195,6 +301,7 @@
             });
         }
 
+        console.log(draggable_group.name)
         const dragActions = scrawl.makeDragZone({
             zone: canvas,
             endOn: ['up', 'leave'],
@@ -202,7 +309,7 @@
             updateWhileMoving: updateIndicatorPosition,
             updateOnEnd: exitDrag,
             preventTouchDefaultWhenDragging: true,
-            collisionGroup: name('draggable'),
+            collisionGroup: draggable_group.name,
         });
 
         // draw the canvas

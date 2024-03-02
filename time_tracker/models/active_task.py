@@ -17,6 +17,9 @@ class ActiveTask(BaseModel):
     # The start time of the active task
     start_time = models.DateTimeField(null=True, blank=True)
 
+    # The note that is used to transfer to the task_timer
+    note = models.CharField(null=True, blank=True, max_length=500)
+
     @property
     def name(self):
         """ Get the name of the active task.
